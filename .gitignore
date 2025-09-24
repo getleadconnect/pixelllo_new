@@ -1,0 +1,121 @@
+### Laravel ###
+/.phpunit.cache
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+.env
+.env.*
+!.env.example
+.phpactor.json
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+auth.json
+
+### IDE ###
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+**/.claude/settings.local.json
+
+### Logs ###
+*.log
+/storage/logs/*
+!/storage/logs/.gitkeep
+
+### Cache ###
+/bootstrap/cache/*
+!/bootstrap/cache/.gitkeep
+/storage/framework/cache/*
+!/storage/framework/cache/.gitkeep
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitkeep
+/storage/framework/testing/*
+!/storage/framework/testing/.gitkeep
+/storage/framework/views/*
+!/storage/framework/views/.gitkeep
+
+### Temporary Files ###
+*.tmp
+*.temp
+*.bak
+*.backup
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+### Test/Debug Files ###
+test_*.php
+check_*.php
+debug*.php
+create_*.php
+add_*.php
+modify_*.php
+reset-*.php
+*_test.php
+*_test.html
+*.test.php
+
+### Database ###
+*.sqlite
+*.sqlite3
+database/*.sqlite
+database/*.sqlite3
+!/database/database.sqlite.example
+
+### Uploads ###
+/public/images/auctions/*
+!/public/images/auctions/.gitkeep
+/public/images/slider/*
+!/public/images/slider/.gitkeep
+/storage/app/public/auctions/*
+!/storage/app/public/auctions/.gitkeep
+/storage/app/public/slider/*
+!/storage/app/public/slider/.gitkeep
+
+### Documentation ###
+debug-*.md
+fix-*.md
+TODO.md
+NOTES.md
+
+### Security ###
+*.pem
+*.key
+*.crt
+*.p12
+/ssl
+/certificates
+
+### Backup Files ###
+*.old
+*.orig
+*.save
+
+### OS Files ###
+.directory
+.Trash-*
+.nfs*
+
+### Package Manager ###
+composer.phar
+package-lock.json
+yarn.lock
+
+### Miscellaneous ###
+.php_cs.cache
+.php-cs-fixer.cache
+coverage/
+phpunit.xml
+.phpunit.xml
+mix-manifest.json
