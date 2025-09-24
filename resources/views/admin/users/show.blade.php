@@ -87,10 +87,24 @@
             
             <!-- User Activity Tabs -->
             <div>
-                <div class="admin-tabs" style="margin-bottom: 15px; border-bottom: 1px solid var(--light-gray);">
-                    <button class="admin-tab active" data-tab="bids">Bid History</button>
-                    <button class="admin-tab" data-tab="won-auctions">Won Auctions</button>
-                    <button class="admin-tab" data-tab="orders">Orders</button>
+                <div class="admin-tabs-container" style="margin-bottom: 25px;">
+                    <div class="admin-tabs-wrapper">
+                        <button class="admin-tab-btn active" data-tab="bids">
+                            <i class="fas fa-gavel"></i>
+                            <span>Bid History</span>
+                            <div class="tab-indicator"></div>
+                        </button>
+                        <button class="admin-tab-btn" data-tab="won-auctions">
+                            <i class="fas fa-trophy"></i>
+                            <span>Won Auctions</span>
+                            <div class="tab-indicator"></div>
+                        </button>
+                        <button class="admin-tab-btn" data-tab="orders">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Orders</span>
+                            <div class="tab-indicator"></div>
+                        </button>
+                    </div>
                 </div>
                 
                 <!-- Bid History Tab -->
@@ -211,25 +225,138 @@
 </div>
 @endsection
 
+@section('styles')
+<style>
+    .admin-tabs-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 4px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    }
+
+    .admin-tabs-wrapper {
+        display: flex;
+        background: white;
+        border-radius: 8px;
+        padding: 4px;
+        gap: 4px;
+    }
+
+    .admin-tab-btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 20px;
+        border: none;
+        background: transparent;
+        color: #6b7280;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-radius: 6px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .admin-tab-btn i {
+        font-size: 16px;
+        transition: transform 0.3s ease;
+    }
+
+    .admin-tab-btn:hover {
+        color: #4b5563;
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .admin-tab-btn:hover i {
+        transform: translateY(-2px);
+    }
+
+    .admin-tab-btn.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .admin-tab-btn .tab-indicator {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 0;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        transition: height 0.3s ease;
+    }
+
+    .admin-tab-btn.active .tab-indicator {
+        height: 3px;
+    }
+
+    /* Add subtle animation on tab switch */
+    .admin-tab-content {
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive design for smaller screens */
+    @media (max-width: 768px) {
+        .admin-tab-btn {
+            padding: 10px 12px;
+            font-size: 13px;
+        }
+
+        .admin-tab-btn i {
+            font-size: 14px;
+        }
+
+        .admin-tab-btn span {
+            display: none;
+        }
+    }
+
+    /* Add hover effect for table rows */
+    .admin-table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .admin-table tbody tr:hover {
+        background-color: rgba(102, 126, 234, 0.02);
+    }
+</style>
+@endsection
+
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // User Activity Tabs
-        const adminTabs = document.querySelectorAll('.admin-tab');
+        const adminTabs = document.querySelectorAll('.admin-tab-btn');
         const adminTabContents = document.querySelectorAll('.admin-tab-content');
-        
+
         adminTabs.forEach(tab => {
             tab.addEventListener('click', function() {
                 // Get tab ID
                 const tabId = this.getAttribute('data-tab');
-                
+
                 // Remove active class from all tabs and contents
                 adminTabs.forEach(t => t.classList.remove('active'));
                 adminTabContents.forEach(c => {
                     c.classList.remove('active');
                     c.style.display = 'none';
                 });
-                
+
                 // Add active class to clicked tab and show content
                 this.classList.add('active');
                 const tabContent = document.getElementById(tabId + '-content');
