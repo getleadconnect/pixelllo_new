@@ -247,7 +247,8 @@
 }
 
 .auction-badge.ending-soon {
-    background-color: #e67e22;
+    background-color: #87CEEB; /* Light blue color */
+    color: #1a5490;
 }
 
 .auction-badge.upcoming {
@@ -381,11 +382,13 @@
 </style>
 <div class="auctions-page">
     <div class="container">
+
+
         <div class="page-header">
             <h1>All Auctions</h1>
             <p class="page-description">Browse all available auctions on Pixelllo. Bid on your favorite items and win them at a fraction of their retail price.</p>
         </div>
-        
+
         <div class="auctions-filter-container">
             <div class="auctions-filter-search-row">
                 <div class="filter-search">
@@ -431,13 +434,13 @@
         <div class="auctions-count">
             <span>Showing <strong>{{ $auctions->count() }}</strong> of <strong>{{ $auctions->total() }}</strong> auctions</span>
         </div>
-        
+
         <div class="auctions-grid">
             @forelse($auctions as $auction)
             @php
                 $isActive = $auction->status === 'active';
                 $isClosed = $auction->status === 'ended' || $auction->endTime < now();
-                $isEndingSoon = $isActive && $auction->endTime->diffInHours(now()) < 6;
+                $isEndingSoon = $isActive && $auction->endTime->diffInHours(now()) < 24;
                 $timeLeft = now()->diffForHumans($auction->endTime, ['parts' => 1]);
                 $urgentTime = $auction->endTime->diffInMinutes(now()) < 10 && $isActive;
 
@@ -520,7 +523,7 @@
             </div>
             @endforelse
         </div>
-        
+
         <div class="pagination-container">
             {{ $auctions->links() }}
         </div>

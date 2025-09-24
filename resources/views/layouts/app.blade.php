@@ -64,25 +64,84 @@
             top: 0;
             z-index: 1000;
         }
-        
+
         .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 1rem 0;
+            position: relative;
         }
-        
+
+        .header-nav-wrapper {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            justify-content: space-between;
+        }
+
         .logo {
             font-size: 1.8rem;
             font-weight: 700;
             color: var(--dark);
             text-decoration: none;
         }
-        
+
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            z-index: 999999;
+        }
+
+        .mobile-menu-toggle span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background-color: var(--dark);
+            margin: 5px 0;
+            transition: 0.3s;
+        }
+
+        .mobile-menu-toggle.active span:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+        }
+
+        .mobile-menu-toggle.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .mobile-menu-toggle.active span:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+        }
+
         .nav-links {
             display: flex;
             gap: 20px;
             align-items: center;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .nav-links .nav-link {
+            padding: 8px 12px;
+        }
+
+        /* Desktop auth buttons on the right */
+        .desktop-auth {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* Hide mobile auth buttons on desktop */
+        @media (min-width: 769px) {
+            .nav-links .auth-buttons {
+                display: none;
+            }
         }
 
         .nav-link {
@@ -99,6 +158,171 @@
         .auth-buttons {
             display: flex;
             gap: 10px;
+            align-items: center;
+        }
+
+        /* Mobile Overlay */
+        .mobile-menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        /* Mobile Menu Close Button */
+        .mobile-menu-close {
+            display: none;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: 1px solid #ddd;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--dark);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .mobile-menu-close:hover {
+            background-color: var(--light);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            .mobile-menu-close {
+                display: block;
+            }
+
+            .desktop-auth {
+                display: none !important;
+            }
+
+            .header-nav-wrapper {
+                display: block;
+            }
+
+            .nav-links .auth-buttons {
+                display: flex !important;
+            }
+
+            .header-content {
+                padding: 0.8rem 0;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 0;
+                left: -300px;
+                width: 300px;
+                height: 100vh;
+                background-color: white;
+                flex-direction: column;
+                padding: 70px 20px 20px;
+                gap: 10px;
+                align-items: flex-start;
+                justify-content: flex-start;
+                transition: left 0.3s ease;
+                z-index: 1001;
+                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+                overflow-y: auto;
+            }
+
+            .nav-links::before {
+                content: 'MENU';
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                font-size: 1.2rem;
+                font-weight: 700;
+                color: var(--primary-color);
+            }
+
+            .nav-links.active {
+                left: 0;
+                z-index:999999;
+            }
+
+            .nav-link {
+                width: 100%;
+                padding: 5px 15px;
+                border-radius: 5px;
+                transition: background-color 0.3s;
+            }
+
+            .nav-link:hover {
+                background-color: var(--light);
+            }
+
+            .auth-buttons {
+                width: 100%;
+                flex-direction: column;
+                padding-top: 20px;
+                margin-top: 20px;
+                border-top: 1px solid #eee;
+            }
+
+            .auth-buttons .btn {
+                width: 100%;
+                text-align: center;
+                padding: 12px;
+            }
+
+            .auth-logged-in {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .user-profile-link {
+                width: 100%;
+                justify-content: center;
+                margin-bottom: 10px;
+            }
+
+            .auth-logged-in form {
+                width: 100%;
+            }
+
+            .auth-logged-in form button {
+                width: 100%;
+            }
+
+            .mobile-menu-overlay.active {
+                display: block;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 10px;
+            }
+
+            .logo {
+                font-size: 1.3rem;
+            }
+
+            .nav-links {
+                width: 250px;
+                left: -250px;
+            }
         }
 
         .user-profile-link:hover {
@@ -438,23 +662,37 @@
     @yield('styles')
 </head>
 <body>
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+
     <!-- Header -->
     <header class="header">
         <div class="container">
             <div class="header-content">
                 <a href="{{ url('/') }}" class="logo">Pixelllo</a>
 
-                <nav class="nav-links">
+                <!-- Mobile Menu Toggle Button -->
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+
+                <div class="header-nav-wrapper">
+                <nav class="nav-links" id="navLinks">
+                    <button class="mobile-menu-close" id="mobileMenuClose">
+                        <i class="fas fa-times" style="margin-top:4px;"></i>
+                    </button>
                     <a href="{{ url('/') }}" class="nav-link">Home</a>
                     <a href="{{ url('/auctions') }}" class="nav-link">Auctions</a>
                     <a href="{{ url('/categories') }}" class="nav-link">Categories</a>
                     <a href="{{ url('/how-it-works') }}" class="nav-link">How It Works</a>
                     <a href="{{ url('/winners') }}" class="nav-link">Winners</a>
-                </nav>
 
-                <div class="auth-buttons">
+                    <!-- Auth buttons moved inside nav for mobile -->
+                    <div class="auth-buttons">
                     @auth
-                        <div style="display: flex; align-items: center; gap: 15px;">
+                        <div class="auth-logged-in">
                             <a href="{{ url('/dashboard') }}" class="user-profile-link" style="display: flex; align-items: center; gap: 10px; text-decoration: none; padding: 5px 12px; border-radius: 25px; transition: all 0.3s ease;">
                                 <div style="width: 35px; height: 35px; border-radius: 50%; overflow: hidden; border: 2px solid #fff; background: #f8f9fa;">
                                     @if(auth()->user()->avatar)
@@ -476,6 +714,35 @@
                         <a href="{{ url('/login') }}" class="btn btn-outline" >Login</a>
                         <a href="{{ url('/register') }}" class="btn btn-primary">Register</a>
                     @endauth
+                    </div>
+                </nav>
+
+                <!-- Desktop Auth Buttons (shown only on desktop) -->
+                <div class="desktop-auth">
+                @auth
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <a href="{{ url('/dashboard') }}" class="user-profile-link" style="display: flex; align-items: center; gap: 10px; text-decoration: none; padding: 5px 12px; border-radius: 25px; transition: all 0.3s ease;">
+                            <div style="width: 35px; height: 35px; border-radius: 50%; overflow: hidden; border: 2px solid #fff; background: #f8f9fa;">
+                                @if(auth()->user()->avatar)
+                                    <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="{{ auth()->user()->name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                @else
+                                    <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 600;">
+                                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                                    </div>
+                                @endif
+                            </div>
+                            <span style="color: #333; font-weight: 500;">{{ auth()->user()->name }}</span>
+                        </a>
+                        <form method="POST" action="{{ url('/logout') }}" style="display: inline;">
+                            @csrf
+                            <button type="submit" class="btn btn-primary" style="padding: 8px 20px;">Logout</button>
+                        </form>
+                    </div>
+                @else
+                    <a href="{{ url('/login') }}" class="btn btn-outline">Login</a>
+                    <a href="{{ url('/register') }}" class="btn btn-primary">Register</a>
+                @endauth
+                </div>
                 </div>
             </div>
         </div>
@@ -571,8 +838,68 @@
     @yield('scripts')
 
     <script>
-        // SweetAlert for Session Messages
+        // Mobile Menu Toggle
         document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const navLinks = document.getElementById('navLinks');
+            const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+            const mobileMenuClose = document.getElementById('mobileMenuClose');
+            const navLinkItems = document.querySelectorAll('.nav-link');
+
+            // Function to open mobile menu
+            function openMobileMenu() {
+                mobileMenuToggle.classList.add('active');
+                navLinks.classList.add('active');
+                mobileMenuOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            // Function to close mobile menu
+            function closeMobileMenu() {
+                mobileMenuToggle.classList.remove('active');
+                navLinks.classList.remove('active');
+                mobileMenuOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            // Toggle mobile menu
+            mobileMenuToggle.addEventListener('click', function() {
+                if (this.classList.contains('active')) {
+                    closeMobileMenu();
+                } else {
+                    openMobileMenu();
+                }
+            });
+
+            // Close menu when clicking close button
+            mobileMenuClose.addEventListener('click', closeMobileMenu);
+
+            // Close menu when clicking overlay
+            mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+
+            // Close menu when clicking on a nav link (optional)
+            navLinkItems.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        mobileMenuToggle.classList.remove('active');
+                        navLinks.classList.remove('active');
+                        mobileMenuOverlay.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                });
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    mobileMenuToggle.classList.remove('active');
+                    navLinks.classList.remove('active');
+                    mobileMenuOverlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+
+            // SweetAlert for Session Messages
             @if(session('success'))
                 @if(session('package_details'))
                     // Purchase success with package details

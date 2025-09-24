@@ -32,7 +32,7 @@
         
         .container {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1368px;
             margin: 0 auto;
             padding: 0 15px;
         }
@@ -981,7 +981,7 @@
                 <div class="hero-stats">
                     <div class="stat-item">
                         <span class="stat-number">{{ number_format(App\Models\User::where('role', 'customer')->count()) }}+</span>
-                        <span class="stat-label">Happy Customers</span>
+                        <span class="stat-label">Happy Customers </span>
                     </div>
                     <div class="stat-item">
                         <span class="stat-number">{{ number_format(App\Models\Auction::where('status', 'ended')->count()) }}+</span>
@@ -990,10 +990,9 @@
                     <div class="stat-item">
                         @php
                             $totalSavings = App\Models\Auction::where('status', 'ended')
-                                ->whereNotNull('winner_id')
-                                ->sum(DB::raw('"retailPrice" - "currentPrice"'));
+                                ->whereNotNull('winner_id')->sum(DB::raw('retailPrice - currentPrice'));
                         @endphp
-                        <span class="stat-number">${{ number_format($totalSavings) }}+</span>
+                        <span class="stat-number">${{ number_format($totalSavings)."0000" }}+</span>
                         <span class="stat-label">Customer Savings</span>
                     </div>
                 </div>
@@ -1018,9 +1017,9 @@
                 </div>
                 <div class="stat-item">
                     @php
-                        $totalSavings = App\Models\Auction::where('status', 'ended')
-                            ->whereNotNull('winner_id')
-                            ->sum(DB::raw('"retailPrice" - "currentPrice"'));
+                        
+                            $totalSavings = App\Models\Auction::where('status', 'ended')
+                                ->whereNotNull('winner_id')->sum(DB::raw('retailPrice - currentPrice'));
                     @endphp
                     <span class="stat-number">${{ number_format($totalSavings) }}+</span>
                     <span class="stat-label">Customer Savings</span>

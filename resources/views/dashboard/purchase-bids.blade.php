@@ -172,7 +172,7 @@
     display: grid;
     grid-template-columns: 1fr 2fr;
     gap: 30px;
-    max-width: 1200px;
+    max-width: 1368px;
     margin: 0 auto;
 }
 

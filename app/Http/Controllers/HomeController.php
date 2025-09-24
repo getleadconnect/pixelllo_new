@@ -107,10 +107,10 @@ class HomeController extends Controller
                          ->where('endTime', '>', now());
                     break;
                 case 'ending-soon':
-                    // Active auctions ending within 6 hours
+                    // Active auctions ending within 24 hours
                     $auct->where('status', 'active')
                          ->where('endTime', '>', now())
-                         ->where('endTime', '<', now()->addHours(6));
+                         ->where('endTime', '<', now()->addHours(24));
                     break;
                 case 'upcoming':
                     // Upcoming auctions
@@ -143,7 +143,7 @@ class HomeController extends Controller
             });
         }
 
-        // Apply sorting
+        // Apply sorting - MODIFIED TO PRIORITIZE ENDING SOON
         if(request('sort')) {
             switch(request('sort')) {
                 case 'price-low':
@@ -163,12 +163,24 @@ class HomeController extends Controller
                     break;
                 case 'ending-soon':
                 default:
-                    $auct->orderBy('endTime', 'ASC');
+                    // Sort by ending soon first (using CASE to prioritize auctions ending within 24 hours)
+                    $auct->orderByRaw("CASE
+                        WHEN status = 'active' AND endTime > NOW() AND endTime <= DATE_ADD(NOW(), INTERVAL 24 HOUR) THEN 0
+                        WHEN status = 'active' THEN 1
+                        ELSE 2
+                    END")
+                    ->orderBy('endTime', 'ASC');
                     break;
             }
         } else {
-            // Default sorting - ending soon first
-            $auct->orderBy('featured', 'DESC')->orderBy('endTime', 'ASC');
+            // Default sorting - ending soon first, then other active auctions
+            $auct->orderByRaw("CASE
+                WHEN status = 'active' AND endTime > NOW() AND endTime <= DATE_ADD(NOW(), INTERVAL 24 HOUR) THEN 0
+                WHEN status = 'active' THEN 1
+                ELSE 2
+            END")
+            ->orderBy('featured', 'DESC')
+            ->orderBy('endTime', 'ASC');
         }
 
         $auctions = $auct->paginate(12)->withQueryString();
@@ -177,7 +189,6 @@ class HomeController extends Controller
         $categories = DB::table('categories')
             ->select('id', 'name', 'slug')
             ->get();
-
 
         return view('auctions', compact('auctions', 'categories'));
     }
