@@ -1064,7 +1064,7 @@ class DashboardController extends Controller
         }
 
         return redirect()->route('dashboard.wins')
-            ->with('success', 'Your order has been successfully placed! Order ID: ' . $order->id);
+            ->with('success', "Your order has been successfully placed! Order ID: { $order->id }. Please check orders list and Complete Payment!");
     }
 
     /**

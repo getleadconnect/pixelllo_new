@@ -596,7 +596,7 @@
                         `,
                         confirmButtonText: 'Awesome!',
                         confirmButtonColor: '#10b981',
-                        timer: 5000,
+                        timer: 6000,
                         timerProgressBar: true,
                         showCloseButton: true,
                         customClass: {
@@ -611,7 +611,7 @@
                         text: "{{ session('success') }}",
                         confirmButtonText: 'OK',
                         confirmButtonColor: '#10b981',
-                        timer: 5000,
+                        timer: 6000,
                         timerProgressBar: true,
                         showCloseButton: true,
                         customClass: {

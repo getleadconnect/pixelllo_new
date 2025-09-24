@@ -97,6 +97,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 
     // Auctions Management
     Route::get('/auctions', [App\Http\Controllers\Admin\AdminAuctionController::class, 'index'])->name('admin.auctions');
+    Route::get('/auctions/won', [App\Http\Controllers\Admin\AdminAuctionController::class, 'wonAuctions'])->name('admin.auctions.won');
     Route::get('/auctions/create', function() {
         $categories = \App\Models\Category::all();
         return view('admin.auctions.create', compact('categories'));
@@ -112,6 +113,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     })->name('admin.auctions.images');
     Route::post('/auctions/{id}/images', [App\Http\Controllers\Admin\AdminAuctionController::class, 'uploadImage'])->name('admin.auctions.upload-image');
     Route::delete('/auctions/{id}/delete-image/{imageIndex}', [App\Http\Controllers\Admin\AdminAuctionController::class, 'deleteImage'])->name('admin.auctions.delete-image');
+    Route::get('/auctions/{id}/complete-purchase', [App\Http\Controllers\Admin\AdminAuctionController::class, 'completePurchaseForm'])->name('admin.auctions.complete-purchase-form');
+    Route::post('/auctions/{id}/complete-purchase', [App\Http\Controllers\Admin\AdminAuctionController::class, 'completePurchase'])->name('admin.auctions.complete-purchase');
 
     // Orders Management
     Route::get('/orders', [App\Http\Controllers\Admin\AdminController::class, 'orders'])->name('admin.orders');

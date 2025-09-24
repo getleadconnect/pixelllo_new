@@ -978,9 +978,17 @@
 
             <!-- Nav Item - Auctions -->
             <div class="nav-item">
-                <a class="nav-link {{ request()->is('admin/auctions*') ? 'active' : '' }}" href="{{ url('/admin/auctions') }}">
+                <a class="nav-link {{ request()->is('admin/auctions') || request()->is('admin/auctions/create') || request()->is('admin/auctions/*/edit') ? 'active' : '' }}" href="{{ url('/admin/auctions') }}">
                     <i class="fas fa-gavel"></i>
                     <span>Auctions</span>
+                </a>
+            </div>
+
+            <!-- Nav Item - Won Auctions -->
+            <div class="nav-item">
+                <a class="nav-link {{ request()->is('admin/auctions/won*') || request()->is('admin/auctions/*/complete-purchase') ? 'active' : '' }}" href="{{ route('admin.auctions.won') }}">
+                    <i class="fas fa-trophy"></i>
+                    <span>Won Auctions</span>
                 </a>
             </div>
 

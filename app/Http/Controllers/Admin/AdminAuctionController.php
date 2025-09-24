@@ -347,4 +347,111 @@ class AdminAuctionController extends Controller
 
         return redirect()->route('admin.auctions.edit', $auction->id)->with('success', 'Image deleted successfully');
     }
+
+    /**
+     * Display won auctions
+     */
+    public function wonAuctions(Request $request)
+    {
+        $query = Auction::with(['category', 'winner', 'order'])
+            ->whereNotNull('winner_id')
+            ->where('status', 'ended');
+
+        // Apply sorting
+        $sortField = $request->get('sort_by', 'endTime');
+        $sortDirection = $request->get('sort_direction', 'desc');
+        $query->orderBy($sortField, $sortDirection);
+
+        $auctions = $query->paginate(15);
+
+        return view('admin.auctions.won', compact('auctions'));
+    }
+
+    /**
+     * Show complete purchase form for won auction
+     */
+    public function completePurchaseForm($id)
+    {
+        $auction = Auction::with(['winner', 'category'])->findOrFail($id);
+
+        // Check if auction has a winner
+        if (!$auction->winner_id) {
+            return redirect()->back()->with('error', 'This auction does not have a winner');
+        }
+
+        // Check if order already exists
+        $existingOrder = \App\Models\Order::where('auction_id', $auction->id)
+            ->where('user_id', $auction->winner_id)
+            ->first();
+
+        if ($existingOrder) {
+            return redirect()->route('admin.auctions.won')
+                ->with('info', 'Order already exists for this auction. Order ID: ' . $existingOrder->id);
+        }
+
+        return view('admin.auctions.complete-purchase', compact('auction'));
+    }
+
+    /**
+     * Process complete purchase for won auction
+     */
+    public function completePurchase(Request $request, $id)
+    {
+        $auction = Auction::with('winner')->findOrFail($id);
+
+        if (!$auction->winner_id) {
+            return redirect()->back()->with('error', 'This auction does not have a winner');
+        }
+
+        // Validate input
+        $request->validate([
+            'shipping_cost' => 'required|numeric|min:0',
+            'tax' => 'required|numeric|min:0',
+            'notes' => 'nullable|string',
+            'shipping_address' => 'required|string',
+            'payment_method' => 'required|in:credit_card,paypal,bank_transfer',
+        ]);
+
+        // Check if order already exists
+        $existingOrder = \App\Models\Order::where('auction_id', $auction->id)
+            ->where('user_id', $auction->winner_id)
+            ->first();
+
+        if ($existingOrder) {
+            return redirect()->route('admin.auctions.won')
+                ->with('info', 'Order already exists for this auction. Order ID: ' . $existingOrder->id);
+        }
+
+        // Calculate totals
+        $subtotal = $auction->currentPrice;
+        $shipping = $request->shipping_cost;
+        $tax = $request->tax;
+        $total = $subtotal + $shipping + $tax;
+
+        // Create order
+        $order = \App\Models\Order::create([
+            'user_id' => $auction->winner_id,
+            'auction_id' => $auction->id,
+            'subtotal' => $subtotal,
+            'shipping_cost' => $shipping,
+            'tax' => $tax,
+            'total' => $total,
+            'amount' => $total, // For backward compatibility
+            'status' => 'pending',
+            'payment_status' => 'pending',
+            'notes' => $request->notes,
+            'shippingAddress' => json_encode(['address' => $request->shipping_address]),
+            'paymentMethod' => json_encode(['method' => $request->payment_method]),
+            'status_history' => json_encode([
+                [
+                    'status' => 'pending',
+                    'timestamp' => now()->toIso8601String(),
+                    'notes' => 'Order created by admin'
+                ]
+            ])
+        ]);
+
+        return redirect()->route('admin.auctions.won')
+            ->with('success', "Your order has been successfully placed! Order ID: {$order->id}. Please check Orders list and Complete Payment!");
+    }
 }
