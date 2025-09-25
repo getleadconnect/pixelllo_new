@@ -12,9 +12,11 @@
             <a href="{{ url('/admin/auctions') }}" class="btn btn-sm btn-primary">
                 <i class="fas fa-arrow-left"></i> Back to Auctions
             </a>
+            @if (($auction->status!=='ended'))
             <a href="{{ url('/admin/auctions/' . $auction->id . '/edit') }}" class="btn btn-sm btn-success">
                 <i class="fas fa-edit"></i> Edit Auction
             </a>
+            @endif
         </div>
     </div>
     <div class="admin-data-card-body">
@@ -120,11 +122,16 @@
             <div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <div>
+
                         <span class="status-badge 
                             {{ $auction->status == 'active' ? 'active' : 
                               ($auction->status == 'upcoming' ? 'pending' : 
-                               ($auction->status == 'ended' ? 'processing' : 'inactive')) }}">
-                            {{ ucfirst($auction->status) }}
+                               ($auction->status == 'ended' ? 'processing' : 'inactive')) }}" style="font-size:1.25rem;
+                               @if ($auction->status == 'ended') color:red; @endif
+                               ">
+
+                                {{ ucfirst($auction->status) }}
+
                         </span>
                         @if ($auction->featured)
                             <span class="status-badge active" style="background-color: rgba(255, 193, 7, 0.1); color: #ffc107;">

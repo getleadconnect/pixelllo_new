@@ -132,7 +132,7 @@
                 </div>
 
                 <!-- Hidden default payment method -->
-                <input type="hidden" name="payment_method" value="credit_card">
+               <!-- <input type="hidden" name="payment_method" value="credit_card">-->
 
                 <!-- Additional Notes -->
                 <div class="checkout-section">

@@ -22,22 +22,22 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
             <div style="background-color: rgba(40, 167, 69, 0.1); padding: 20px; border-radius: 8px; text-align: center;">
                 <h5 style="color: #28a745; margin-bottom: 10px;">Total Revenue</h5>
-                <p style="font-size: 1.8rem; font-weight: 700; margin: 0;">${{ number_format($totalRevenue ?? 45875.50, 2) }}</p>
+                <p style="font-size: 1.8rem; font-weight: 700; margin: 0;">${{ number_format($totalRevenue ?? 0, 2) }}</p>
             </div>
             
             <div style="background-color: rgba(23, 162, 184, 0.1); padding: 20px; border-radius: 8px; text-align: center;">
                 <h5 style="color: #17a2b8; margin-bottom: 10px;">Average Order Value</h5>
-                <p style="font-size: 1.8rem; font-weight: 700; margin: 0;">${{ number_format($avgOrderValue ?? 98.45, 2) }}</p>
+                <p style="font-size: 1.8rem; font-weight: 700; margin: 0;">${{ number_format($avgOrderValue ?? 0, 2) }}</p>
             </div>
             
             <div style="background-color: rgba(255, 153, 0, 0.1); padding: 20px; border-radius: 8px; text-align: center;">
                 <h5 style="color: #ff9900; margin-bottom: 10px;">Total Orders</h5>
-                <p style="font-size: 1.8rem; font-weight: 700; margin: 0;">{{ number_format($totalOrders ?? 465) }}</p>
+                <p style="font-size: 1.8rem; font-weight: 700; margin: 0;">{{ number_format($totalOrders ?? 0) }}</p>
             </div>
             
             <div style="background-color: rgba(255, 193, 7, 0.1); padding: 20px; border-radius: 8px; text-align: center;">
                 <h5 style="color: #ffc107; margin-bottom: 10px;">Conversion Rate</h5>
-                <p style="font-size: 1.8rem; font-weight: 700; margin: 0;">{{ number_format($conversionRate ?? 78.5) }}%</p>
+                <p style="font-size: 1.8rem; font-weight: 700; margin: 0;">{{ number_format($conversionRate ?? 0, 1) }}%</p>
             </div>
         </div>
         
@@ -87,27 +87,18 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @php
-                            $categories = [
-                                ['name' => 'Electronics', 'revenue' => 12580.25, 'orders' => 95],
-                                ['name' => 'Fashion', 'revenue' => 8750.80, 'orders' => 120],
-                                ['name' => 'Home & Garden', 'revenue' => 6320.15, 'orders' => 78],
-                                ['name' => 'Sports', 'revenue' => 5425.50, 'orders' => 65],
-                                ['name' => 'Collectibles', 'revenue' => 4875.30, 'orders' => 42],
-                                ['name' => 'Jewelry', 'revenue' => 3980.75, 'orders' => 25],
-                                ['name' => 'Toys', 'revenue' => 2450.20, 'orders' => 30],
-                                ['name' => 'Other', 'revenue' => 1492.55, 'orders' => 10],
-                            ];
-                        @endphp
-                        
-                        @foreach ($categories as $category)
+                        @forelse ($salesByCategory ?? [] as $category)
                             <tr>
-                                <td>{{ $category['name'] }}</td>
-                                <td>${{ number_format($category['revenue'], 2) }}</td>
-                                <td>{{ number_format($category['orders']) }}</td>
-                                <td>${{ number_format($category['revenue'] / $category['orders'], 2) }}</td>
+                                <td>{{ $category->category_name ?? 'Uncategorized' }}</td>
+                                <td>${{ number_format($category->revenue ?? 0, 2) }}</td>
+                                <td>{{ number_format($category->order_count ?? 0) }}</td>
+                                <td>${{ $category->order_count > 0 ? number_format($category->revenue / $category->order_count, 2) : '0.00' }}</td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="4" class="text-center">No sales data available</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
@@ -180,16 +171,15 @@
         // Prepare data for the chart
         let monthlySalesData = [];
         let monthlyOrdersData = [];
-        
+
         @if (isset($monthlySales) && count($monthlySales) > 0)
             @foreach ($monthlySales as $data)
                 monthlySalesData[{{ $data->month - 1 }}] = {{ $data->total }};
                 monthlyOrdersData[{{ $data->month - 1 }}] = {{ $data->count }};
             @endforeach
         @else
-            // Sample data if not available
-            monthlySalesData = [3250, 3750, 4200, 4800, 5300, 4950, 5250, 5800, 6200, 5900, 6500, 7200];
-            monthlyOrdersData = [35, 40, 45, 50, 55, 50, 55, 60, 65, 60, 68, 75];
+            monthlySalesData = Array(12).fill(0);
+            monthlyOrdersData = Array(12).fill(0);
         @endif
         
         const monthlySalesChart = new Chart(monthlySalesCtx, {
@@ -249,13 +239,16 @@
         
         // Year over Year Comparison Chart
         const yearComparisonCtx = document.getElementById('yearComparisonChart').getContext('2d');
+        const thisYearData = monthlySalesData;
+        const lastYearData = @json($lastYearSales ?? []);
+
         const yearComparisonChart = new Chart(yearComparisonCtx, {
             type: 'line',
             data: {
                 labels: monthNames,
                 datasets: [{
                     label: 'This Year',
-                    data: [3250, 3750, 4200, 4800, 5300, 4950, 5250, 5800, 6200, 5900, 6500, 7200],
+                    data: thisYearData,
                     borderColor: '#28a745',
                     backgroundColor: 'rgba(40, 167, 69, 0.1)',
                     borderWidth: 2,
@@ -263,7 +256,7 @@
                     fill: true
                 }, {
                     label: 'Last Year',
-                    data: [2800, 3200, 3600, 4100, 4500, 4200, 4500, 4900, 5300, 5000, 5500, 6200],
+                    data: lastYearData,
                     borderColor: '#17a2b8',
                     backgroundColor: 'rgba(23, 162, 184, 0.1)',
                     borderWidth: 2,
@@ -289,12 +282,16 @@
         
         // Category Sales Chart
         const categorySalesCtx = document.getElementById('categorySalesChart').getContext('2d');
+        const categoryData = @json($salesByCategory ?? []);
+        const categoryLabels = categoryData.map(c => c.category_name || 'Uncategorized');
+        const categoryRevenue = categoryData.map(c => c.revenue || 0);
+
         const categorySalesChart = new Chart(categorySalesCtx, {
             type: 'pie',
             data: {
-                labels: ['Electronics', 'Fashion', 'Home & Garden', 'Sports', 'Collectibles', 'Jewelry', 'Toys', 'Other'],
+                labels: categoryLabels,
                 datasets: [{
-                    data: [12580.25, 8750.80, 6320.15, 5425.50, 4875.30, 3980.75, 2450.20, 1492.55],
+                    data: categoryRevenue,
                     backgroundColor: [
                         'rgba(23, 162, 184, 0.6)',
                         'rgba(40, 167, 69, 0.6)',
@@ -333,13 +330,25 @@
         
         // Daily Sales Distribution Chart
         const dailySalesCtx = document.getElementById('dailySalesChart').getContext('2d');
+        const dailySalesData = @json($dailySales ?? []);
+        // Rearrange to start with Monday (index 1 in dailySalesData)
+        const rearrangedDailyData = [
+            dailySalesData[1] || 0, // Monday
+            dailySalesData[2] || 0, // Tuesday
+            dailySalesData[3] || 0, // Wednesday
+            dailySalesData[4] || 0, // Thursday
+            dailySalesData[5] || 0, // Friday
+            dailySalesData[6] || 0, // Saturday
+            dailySalesData[0] || 0  // Sunday
+        ];
+
         const dailySalesChart = new Chart(dailySalesCtx, {
             type: 'bar',
             data: {
                 labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
                 datasets: [{
                     label: 'Orders',
-                    data: [60, 65, 70, 75, 90, 120, 85],
+                    data: rearrangedDailyData,
                     backgroundColor: 'rgba(40, 167, 69, 0.6)',
                     borderColor: '#28a745',
                     borderWidth: 1
@@ -359,13 +368,15 @@
         // Hourly Sales Distribution Chart
         const hourlySalesCtx = document.getElementById('hourlySalesChart').getContext('2d');
         const hours = Array.from({length: 24}, (_, i) => `${i}:00`);
+        const hourlySalesData = @json($hourlySales ?? []);
+
         const hourlySalesChart = new Chart(hourlySalesCtx, {
             type: 'line',
             data: {
                 labels: hours,
                 datasets: [{
                     label: 'Orders',
-                    data: [2, 1, 1, 0, 0, 1, 3, 8, 15, 20, 25, 30, 35, 32, 28, 25, 30, 40, 45, 35, 25, 15, 8, 4],
+                    data: hourlySalesData,
                     borderColor: '#17a2b8',
                     backgroundColor: 'rgba(23, 162, 184, 0.1)',
                     tension: 0.4,
@@ -390,12 +401,22 @@
         
         // Customer Tiers Chart
         const customerTiersCtx = document.getElementById('customerTiersChart').getContext('2d');
+        const tierCounts = @json($tierCounts ?? []);
+        const tierData = [
+            tierCounts['1-50'] || 0,
+            tierCounts['51-100'] || 0,
+            tierCounts['101-250'] || 0,
+            tierCounts['251-500'] || 0,
+            tierCounts['501-1000'] || 0,
+            tierCounts['1000+'] || 0
+        ];
+
         const customerTiersChart = new Chart(customerTiersCtx, {
             type: 'doughnut',
             data: {
                 labels: ['$1-$50', '$51-$100', '$101-$250', '$251-$500', '$501-$1000', '$1000+'],
                 datasets: [{
-                    data: [35, 25, 20, 10, 7, 3],
+                    data: tierData,
                     backgroundColor: [
                         'rgba(108, 117, 125, 0.6)',
                         'rgba(23, 162, 184, 0.6)',
@@ -420,12 +441,20 @@
         
         // Repeat Purchase Chart
         const repeatPurchaseCtx = document.getElementById('repeatPurchaseChart').getContext('2d');
+        const repeatData = @json($repeatPurchaseData ?? []);
+        const repeatValues = [
+            repeatData['one_time'] || 0,
+            repeatData['two_three'] || 0,
+            repeatData['four_five'] || 0,
+            repeatData['six_plus'] || 0
+        ];
+
         const repeatPurchaseChart = new Chart(repeatPurchaseCtx, {
             type: 'doughnut',
             data: {
                 labels: ['One-time Buyers', '2-3 Purchases', '4-5 Purchases', '6+ Purchases'],
                 datasets: [{
-                    data: [60, 25, 10, 5],
+                    data: repeatValues,
                     backgroundColor: [
                         'rgba(108, 117, 125, 0.6)',
                         'rgba(23, 162, 184, 0.6)',

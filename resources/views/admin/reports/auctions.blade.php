@@ -30,22 +30,22 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
             <div style="background-color: rgba(40, 167, 69, 0.1); padding: 20px; border-radius: 8px; text-align: center;">
                 <h5 style="color: #28a745; margin-bottom: 10px;">Average Final Price</h5>
-                <p style="font-size: 1.8rem; font-weight: 700; margin: 0;">${{ number_format($avgFinalPrice ?? 78.45, 2) }}</p>
+                <p style="font-size: 1.8rem; font-weight: 700; margin: 0;">${{ number_format($avgFinalPrice, 2) }}</p>
             </div>
             
             <div style="background-color: rgba(23, 162, 184, 0.1); padding: 20px; border-radius: 8px; text-align: center;">
                 <h5 style="color: #17a2b8; margin-bottom: 10px;">Average Bids Per Auction</h5>
-                <p style="font-size: 1.8rem; font-weight: 700; margin: 0;">{{ number_format($avgBidsPerAuction ?? 42) }}</p>
+                <p style="font-size: 1.8rem; font-weight: 700; margin: 0;">{{ number_format($avgBidsPerAuction) }}</p>
             </div>
             
             <div style="background-color: rgba(255, 153, 0, 0.1); padding: 20px; border-radius: 8px; text-align: center;">
                 <h5 style="color: #ff9900; margin-bottom: 10px;">Average Unique Bidders</h5>
-                <p style="font-size: 1.8rem; font-weight: 700; margin: 0;">{{ number_format($avgUniqueBidders ?? 12) }}</p>
+                <p style="font-size: 1.8rem; font-weight: 700; margin: 0;">{{ number_format($avgUniqueBidders, 1) }}</p>
             </div>
             
             <div style="background-color: rgba(255, 193, 7, 0.1); padding: 20px; border-radius: 8px; text-align: center;">
                 <h5 style="color: #ffc107; margin-bottom: 10px;">Completion Rate</h5>
-                <p style="font-size: 1.8rem; font-weight: 700; margin: 0;">{{ number_format($completionRate ?? 94) }}%</p>
+                <p style="font-size: 1.8rem; font-weight: 700; margin: 0;">{{ number_format($completionRate) }}%</p>
             </div>
         </div>
         
@@ -200,18 +200,12 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Auction Activity Chart (Last 30 days)
         const auctionActivityCtx = document.getElementById('auctionActivityChart').getContext('2d');
-        
-        // Generate dates for the last 30 days
-        const dates = [];
-        for (let i = 29; i >= 0; i--) {
-            const d = new Date();
-            d.setDate(d.getDate() - i);
-            dates.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-        }
-        
-        // Generate some sample data
-        const newAuctions = Array(30).fill().map(() => Math.floor(Math.random() * 10) + 1);
-        const completedAuctions = Array(30).fill().map(() => Math.floor(Math.random() * 8) + 1);
+
+        // Use real data from controller
+        const auctionActivityData = @json($auctionActivityData ?? []);
+        const dates = auctionActivityData.map(d => d.date);
+        const newAuctions = auctionActivityData.map(d => d.new);
+        const completedAuctions = auctionActivityData.map(d => d.completed);
         
         const auctionActivityChart = new Chart(auctionActivityCtx, {
             type: 'line',
@@ -251,13 +245,17 @@
         
         // Auction Category Distribution Chart
         const auctionCategoryCtx = document.getElementById('auctionCategoryChart').getContext('2d');
+        const categoryData = @json($auctionsByCategory ?? []);
+        const categoryLabels = categoryData.map(d => d.category_name || 'Uncategorized');
+        const categoryCounts = categoryData.map(d => d.count);
+
         const auctionCategoryChart = new Chart(auctionCategoryCtx, {
             type: 'bar',
             data: {
-                labels: ['Electronics', 'Fashion', 'Home & Garden', 'Sports', 'Collectibles', 'Jewelry', 'Toys', 'Other'],
+                labels: categoryLabels,
                 datasets: [{
                     label: 'Number of Auctions',
-                    data: [35, 25, 20, 18, 15, 12, 10, 5],
+                    data: categoryCounts,
                     backgroundColor: [
                         'rgba(23, 162, 184, 0.6)',
                         'rgba(40, 167, 69, 0.6)',
@@ -284,13 +282,17 @@
         
         // Bid Timing Distribution Chart
         const bidTimingCtx = document.getElementById('bidTimingChart').getContext('2d');
+        const bidTimingData = @json($bidTimingData ?? []);
+        const bidTimingLabels = bidTimingData.map(d => d.label);
+        const bidTimingValues = bidTimingData.map(d => d.value);
+
         const bidTimingChart = new Chart(bidTimingCtx, {
             type: 'line',
             data: {
-                labels: ['Start', '10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%', 'End'],
+                labels: bidTimingLabels,
                 datasets: [{
                     label: 'Bid Distribution',
-                    data: [5, 7, 9, 10, 12, 15, 18, 25, 40, 70, 95],
+                    data: bidTimingValues,
                     borderColor: '#ff9900',
                     backgroundColor: 'rgba(255, 153, 0, 0.1)',
                     tension: 0.4,
@@ -320,13 +322,17 @@
         
         // Price Increase Over Time Chart
         const priceIncreaseCtx = document.getElementById('priceIncreaseChart').getContext('2d');
+        const priceIncreaseData = @json($priceIncreaseData ?? []);
+        const priceLabels = priceIncreaseData.length > 0 ? priceIncreaseData.map(d => d.label) : ['Start', '10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%', 'End'];
+        const priceValues = priceIncreaseData.length > 0 ? priceIncreaseData.map(d => d.value) : [1, 1.2, 1.5, 1.8, 2.3, 3, 4, 5.5, 7.5, 10.5, 15];
+
         const priceIncreaseChart = new Chart(priceIncreaseCtx, {
             type: 'line',
             data: {
-                labels: ['Start', '10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%', 'End'],
+                labels: priceLabels,
                 datasets: [{
                     label: 'Price Increase',
-                    data: [1, 1.2, 1.5, 1.8, 2.3, 3, 4, 5.5, 7.5, 10.5, 15],
+                    data: priceValues,
                     borderColor: '#28a745',
                     backgroundColor: 'rgba(40, 167, 69, 0.1)',
                     tension: 0.4,

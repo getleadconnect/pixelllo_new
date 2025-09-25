@@ -67,7 +67,7 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="status-badge {{ $user->active ? 'active' : 'inactive' }}">
+                                <span class="status-badge {{ $user->active ? 'active' : 'inactive-red' }}">
                                     {{ $user->active ? 'Active' : 'Inactive' }}
                                 </span>
                             </td>
@@ -108,4 +108,20 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('styles')
+<style>
+    /* Inactive badge styling */
+    .status-badge.inactive-red {
+        background-color: #fee2e2;
+        color: #dc2626;
+        border: 1px solid #fca5a5;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+    }
+</style>
 @endsection

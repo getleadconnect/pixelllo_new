@@ -94,6 +94,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/users/{id}/edit', [App\Http\Controllers\Admin\AdminController::class, 'editUser'])->name('admin.users.edit');
     Route::put('/users/{id}', [App\Http\Controllers\Admin\AdminController::class, 'updateUser'])->name('admin.users.update');
     Route::delete('/users/{id}', [App\Http\Controllers\Admin\AdminController::class, 'deleteUser'])->name('admin.users.delete');
+    Route::post('/users/{id}/toggle-status', [App\Http\Controllers\Admin\AdminController::class, 'toggleUserStatus'])->name('admin.users.toggle-status');
+    Route::post('/users/message', [App\Http\Controllers\Admin\AdminController::class, 'sendMessage'])->name('admin.users.message');
 
     // Auctions Management
     Route::get('/auctions', [App\Http\Controllers\Admin\AdminAuctionController::class, 'index'])->name('admin.auctions');

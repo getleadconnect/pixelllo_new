@@ -66,8 +66,20 @@ class AdminAuctionController extends Controller
         // Update auction status based on endTime
         $now = now();
         foreach ($auctions as $auction) {
-            if ($auction->endTime && $auction->endTime < $now) {
+            // If endTime has passed, mark as ended
+            if ($auction->endTime && $auction->endTime < $now && $auction->status != 'ended' && $auction->status != 'cancelled') {
                 $auction->status = 'ended';
+                $auction->save();
+            }
+            // If auction is marked as ended but endTime hasn't passed yet, fix it
+            elseif ($auction->endTime && $auction->endTime >= $now && $auction->status == 'ended') {
+                // Determine correct status based on startTime
+                if ($auction->startTime && $auction->startTime <= $now) {
+                    $auction->status = 'active';
+                } else {
+                    $auction->status = 'upcoming';
+                }
+                $auction->save();
             }
         }
 
@@ -353,18 +365,54 @@ class AdminAuctionController extends Controller
      */
     public function wonAuctions(Request $request)
     {
-        $query = Auction::with(['category', 'winner', 'order'])
-            ->whereNotNull('winner_id')
-            ->where('status', 'ended');
+        // Get the tab parameter (default to 'pending')
+        $tab = $request->get('tab', 'pending');
+
+        // Get orders with auction and user relationships
+        $ordersQuery = \App\Models\Order::with(['auction', 'user', 'auction.category']);
+
+        // Filter based on payment_status
+        if ($tab == 'pending') {
+            // Orders where payment is pending or null
+            $ordersQuery->where(function($query) {
+                $query->where('payment_status', 'pending')
+                      ->orWhereNull('payment_status');
+            });
+        } else if ($tab == 'completed') {
+            // Orders where payment is paid
+            $ordersQuery->where('payment_status', 'paid');
+        }
 
         // Apply sorting
-        $sortField = $request->get('sort_by', 'endTime');
+        $sortField = $request->get('sort_by', 'created_at');
         $sortDirection = $request->get('sort_direction', 'desc');
-        $query->orderBy($sortField, $sortDirection);
+        $ordersQuery->orderBy($sortField, $sortDirection);
 
-        $auctions = $query->paginate(15);
+        // Paginate with 10 items per page and preserve query parameters
+        $orders = $ordersQuery->paginate(10)->appends(['tab' => $tab]);
 
-        return view('admin.auctions.won', compact('auctions'));
+        // Get counts for tabs
+        $pendingCount = \App\Models\Order::where(function($query) {
+            $query->where('payment_status', 'pending')
+                  ->orWhereNull('payment_status');
+        })->count();
+
+        $completedCount = \App\Models\Order::where('payment_status', 'paid')->count();
+
+        // Also get won auctions without orders (legacy support)
+        $wonAuctionsWithoutOrders = Auction::with(['category', 'winner'])
+            ->whereNotNull('winner_id')
+            ->where('status', 'ended')
+            ->whereDoesntHave('order')
+            ->paginate(10, ['*'], 'auction_page');
+
+        return view('admin.auctions.won', compact(
+            'orders',
+            'tab',
+            'pendingCount',
+            'completedCount',
+            'wonAuctionsWithoutOrders'
+        ));
     }
 
     /**

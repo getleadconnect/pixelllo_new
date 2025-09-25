@@ -15,7 +15,7 @@
             </div>
             <div class="admin-card-content">
                 <h3>{{ number_format($totalUsers ?? 0) }}</h3>
-                <p>Total Users</p>
+                <p>Total Customers</p>
             </div>
         </div>
     </div>
@@ -54,7 +54,76 @@
             </div>
             <div class="admin-card-content">
                 <h3>${{ number_format($totalRevenue ?? 0, 2) }}</h3>
-                <p>Total Revenue</p>
+                <p>Total Revenue (Paid)</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Today's Activity -->
+<div class="admin-data-card" style="margin-bottom: 30px;">
+    <div class="admin-data-card-header">
+        <div class="admin-data-card-title">Today's Activity</div>
+    </div>
+    <div class="admin-data-card-body">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+            <div style="text-align: center; padding: 15px; background: rgba(23, 162, 184, 0.1); border-radius: 8px;">
+                <i class="fas fa-user-plus" style="font-size: 24px; color: #17a2b8; margin-bottom: 10px;"></i>
+                <h4 style="margin: 0; font-size: 1.5rem;">{{ number_format($todayUsers ?? 0) }}</h4>
+                <p style="margin: 5px 0 0; color: #666; font-size: 0.9rem;">New Users</p>
+            </div>
+            <div style="text-align: center; padding: 15px; background: rgba(255, 193, 7, 0.1); border-radius: 8px;">
+                <i class="fas fa-gavel" style="font-size: 24px; color: #ffc107; margin-bottom: 10px;"></i>
+                <h4 style="margin: 0; font-size: 1.5rem;">{{ number_format($todayAuctions ?? 0) }}</h4>
+                <p style="margin: 5px 0 0; color: #666; font-size: 0.9rem;">New Auctions</p>
+            </div>
+            <div style="text-align: center; padding: 15px; background: rgba(255, 153, 0, 0.1); border-radius: 8px;">
+                <i class="fas fa-hand-paper" style="font-size: 24px; color: #ff9900; margin-bottom: 10px;"></i>
+                <h4 style="margin: 0; font-size: 1.5rem;">{{ number_format($todayBids ?? 0) }}</h4>
+                <p style="margin: 5px 0 0; color: #666; font-size: 0.9rem;">Bids Placed</p>
+            </div>
+            <div style="text-align: center; padding: 15px; background: rgba(40, 167, 69, 0.1); border-radius: 8px;">
+                <i class="fas fa-dollar-sign" style="font-size: 24px; color: #28a745; margin-bottom: 10px;"></i>
+                <h4 style="margin: 0; font-size: 1.5rem;">${{ number_format($todayRevenue ?? 0, 2) }}</h4>
+                <p style="margin: 5px 0 0; color: #666; font-size: 0.9rem;">Revenue Today</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Key Performance Metrics -->
+<div class="admin-data-card" style="margin-bottom: 30px;">
+    <div class="admin-data-card-header">
+        <div class="admin-data-card-title">Key Performance Metrics</div>
+    </div>
+    <div class="admin-data-card-body">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+            <div style="padding: 15px; border: 1px solid #e5e7eb; border-radius: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h5 style="margin: 0 0 5px; color: #666;">Active Users (30 days)</h5>
+                        <h3 style="margin: 0; color: #17a2b8;">{{ number_format($activeUsers ?? 0) }}</h3>
+                    </div>
+                    <i class="fas fa-user-check" style="font-size: 30px; color: #17a2b8; opacity: 0.3;"></i>
+                </div>
+            </div>
+            <div style="padding: 15px; border: 1px solid #e5e7eb; border-radius: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h5 style="margin: 0 0 5px; color: #666;">Auction Conversion Rate</h5>
+                        <h3 style="margin: 0; color: #28a745;">{{ number_format($auctionConversionRate ?? 0, 1) }}%</h3>
+                    </div>
+                    <i class="fas fa-chart-line" style="font-size: 30px; color: #28a745; opacity: 0.3;"></i>
+                </div>
+            </div>
+            <div style="padding: 15px; border: 1px solid #e5e7eb; border-radius: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h5 style="margin: 0 0 5px; color: #666;">Auction Win Rate</h5>
+                        <h3 style="margin: 0; color: #ffc107;">{{ number_format($winRate ?? 0, 1) }}%</h3>
+                    </div>
+                    <i class="fas fa-trophy" style="font-size: 30px; color: #ffc107; opacity: 0.3;"></i>
+                </div>
             </div>
         </div>
     </div>
@@ -266,10 +335,10 @@
                 labels: ['Upcoming', 'Active', 'Ended', 'Cancelled'],
                 datasets: [{
                     data: [
-                        {{ isset($auctionStatusCounts) ? ($auctionStatusCounts['upcoming'] ?? 0) : 10 }},
-                        {{ isset($auctionStatusCounts) ? ($auctionStatusCounts['active'] ?? 0) : 25 }},
-                        {{ isset($auctionStatusCounts) ? ($auctionStatusCounts['ended'] ?? 0) : 50 }},
-                        {{ isset($auctionStatusCounts) ? ($auctionStatusCounts['cancelled'] ?? 0) : 15 }}
+                        {{ $auctionStatusData['upcoming'] ?? 0 }},
+                        {{ $auctionStatusData['active'] ?? 0 }},
+                        {{ $auctionStatusData['ended'] ?? 0 }},
+                        {{ $auctionStatusData['cancelled'] ?? 0 }}
                     ],
                     backgroundColor: [
                         '#ffc107', // Upcoming (yellow)
@@ -296,19 +365,21 @@
         const orderStatusChart = new Chart(orderStatusCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Pending', 'Processing', 'Shipped', 'Delivered'],
+                labels: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
                 datasets: [{
                     data: [
-                        {{ isset($orderStatusCounts) ? ($orderStatusCounts['pending'] ?? 0) : 15 }},
-                        {{ isset($orderStatusCounts) ? ($orderStatusCounts['processing'] ?? 0) : 20 }},
-                        {{ isset($orderStatusCounts) ? ($orderStatusCounts['shipped'] ?? 0) : 25 }},
-                        {{ isset($orderStatusCounts) ? ($orderStatusCounts['delivered'] ?? 0) : 40 }}
+                        {{ $orderStatusData['pending'] ?? 0 }},
+                        {{ $orderStatusData['processing'] ?? 0 }},
+                        {{ $orderStatusData['shipped'] ?? 0 }},
+                        {{ $orderStatusData['delivered'] ?? 0 }},
+                        {{ $orderStatusData['cancelled'] ?? 0 }}
                     ],
                     backgroundColor: [
                         '#ffc107', // Pending (yellow)
                         '#17a2b8', // Processing (blue)
                         '#fd7e14', // Shipped (orange)
-                        '#28a745'  // Delivered (green)
+                        '#28a745', // Delivered (green)
+                        '#dc3545'  // Cancelled (red)
                     ],
                     borderWidth: 1
                 }]

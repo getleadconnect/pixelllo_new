@@ -1015,7 +1015,6 @@ class DashboardController extends Controller
             'state' => 'required|string|max:100',
             'zip' => 'required|string|max:20',
             'country' => 'required|string|max:100',
-            'payment_method' => 'required|in:credit_card,paypal,bank_transfer'
         ]);
 
         // Calculate order totals
@@ -1048,20 +1047,19 @@ class DashboardController extends Controller
             'total' => $total,
             'status' => 'pending',
             'shippingAddress' => $shippingAddress,
-            'paymentMethod' => $request->payment_method,
             'payment_status' => 'pending',
-            'transaction_id' => 'TXN-' . strtoupper(uniqid()),
+            'transaction_id' => null , //'TXN-' . strtoupper(uniqid()),
             'notes' => $request->notes ?? null
         ]);
 
         // For testing, automatically mark as processing
         // In production, this would be done after payment confirmation
-        if ($request->payment_method === 'credit_card') {
+        /*if ($request->payment_method === 'credit_card') {
             $order->update([
                 'status' => 'processing',
                 'payment_status' => 'completed'
             ]);
-        }
+        }*/
 
         return redirect()->route('dashboard.wins')
             ->with('success', "Your order has been successfully placed! Order ID: { $order->id }. Please check orders list and Complete Payment!");

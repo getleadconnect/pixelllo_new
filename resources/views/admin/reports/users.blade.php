@@ -1,3 +1,7 @@
+@php
+use App\Models\User;
+@endphp
+
 @extends('layouts.admin')
 
 @section('title', 'User Reports')
@@ -186,12 +190,12 @@
                 datasets: [{
                     label: 'Number of Users',
                     data: [
-                        {{ isset($userActivityDistribution) ? ($userActivityDistribution[0] ?? 0) : 120 }},
-                        {{ isset($userActivityDistribution) ? ($userActivityDistribution[1] ?? 0) : 95 }},
-                        {{ isset($userActivityDistribution) ? ($userActivityDistribution[2] ?? 0) : 60 }},
-                        {{ isset($userActivityDistribution) ? ($userActivityDistribution[3] ?? 0) : 40 }},
-                        {{ isset($userActivityDistribution) ? ($userActivityDistribution[4] ?? 0) : 25 }},
-                        {{ isset($userActivityDistribution) ? ($userActivityDistribution[5] ?? 0) : 10 }}
+                        {{ $userActivityDistribution[0] ?? 0 }},
+                        {{ $userActivityDistribution[1] ?? 0 }},
+                        {{ $userActivityDistribution[2] ?? 0 }},
+                        {{ $userActivityDistribution[3] ?? 0 }},
+                        {{ $userActivityDistribution[4] ?? 0 }},
+                        {{ $userActivityDistribution[5] ?? 0 }}
                     ],
                     backgroundColor: 'rgba(23, 162, 184, 0.6)',
                     borderColor: '#17a2b8',
@@ -211,13 +215,12 @@
         
         // User Growth Chart
         const userGrowthCtx = document.getElementById('userGrowthChart').getContext('2d');
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        
-        // Generate random sample data for monthly registrations
-        const monthlyData = [35, 45, 55, 70, 65, 85, 95, 110, 120, 130, 145, 160];
-        const cumulativeData = monthlyData.reduce((acc, curr, i) => {
-            return [...acc, (acc[i-1] || 0) + curr];
-        }, []);
+
+        // Use real data from controller
+        const userGrowthData = @json($userGrowthData ?? []);
+        const monthNames = userGrowthData.map(d => d.month);
+        const monthlyData = userGrowthData.map(d => d.new_users);
+        const cumulativeData = userGrowthData.map(d => d.total_users);
         
         const userGrowthChart = new Chart(userGrowthCtx, {
             type: 'line',
@@ -270,12 +273,25 @@
         
         // User Country Chart
         const userCountryCtx = document.getElementById('userCountryChart').getContext('2d');
+        const countryData = @json($usersByCountry ?? []);
+        const countryLabels = countryData.map(d => d.country || 'Unknown');
+        const countryCounts = countryData.map(d => d.count || 0);
+
+        // Add 'Other' if we have data
+        const totalCountryUsers = countryCounts.reduce((a, b) => a + b, 0);
+        const totalUsers = {{ User::where('role', 'customer')->count() }};
+        const otherCount = Math.max(0, totalUsers - totalCountryUsers);
+        if (otherCount > 0) {
+            countryLabels.push('Other');
+            countryCounts.push(otherCount);
+        }
+
         const userCountryChart = new Chart(userCountryCtx, {
             type: 'pie',
             data: {
-                labels: ['United States', 'United Kingdom', 'Canada', 'Australia', 'Germany', 'Other'],
+                labels: countryLabels,
                 datasets: [{
-                    data: [45, 20, 15, 10, 5, 5],
+                    data: countryCounts,
                     backgroundColor: [
                         'rgba(40, 167, 69, 0.6)',
                         'rgba(23, 162, 184, 0.6)',
@@ -305,7 +321,7 @@
             data: {
                 labels: ['Customers', 'Admins'],
                 datasets: [{
-                    data: [95, 5],
+                    data: [{{ $usersByRole['customers'] ?? 0 }}, {{ $usersByRole['admins'] ?? 0 }}],
                     backgroundColor: [
                         'rgba(23, 162, 184, 0.6)',
                         'rgba(220, 53, 69, 0.6)'
@@ -331,7 +347,7 @@
             data: {
                 labels: ['Active', 'Inactive'],
                 datasets: [{
-                    data: [85, 15],
+                    data: [{{ $usersByStatus['active'] ?? 0 }}, {{ $usersByStatus['inactive'] ?? 0 }}],
                     backgroundColor: [
                         'rgba(40, 167, 69, 0.6)',
                         'rgba(108, 117, 125, 0.6)'
