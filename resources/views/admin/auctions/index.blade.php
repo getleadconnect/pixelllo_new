@@ -318,9 +318,6 @@
             </div>
         </form>
 
-        @php
-        echo now();
-        @endphp
         
         <table id="auctionsTable" class="admin-table table table-striped table-bordered">
             <thead>
