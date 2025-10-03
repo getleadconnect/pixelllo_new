@@ -7,7 +7,7 @@
 /storage/*.key
 /storage/pail
 /vendor
-/config/app.php
+/config
 .env
 .env.*
 !.env.example
