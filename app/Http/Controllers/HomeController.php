@@ -20,6 +20,12 @@ class HomeController extends Controller
      *
      * @return \Illuminate\View\View
      */
+
+public function __construct()
+{
+    date_default_timezone_set('Asia/Kolkata');
+}
+
     public function index()
     {
         // Get featured auctions (ensure they're active and not ended)
@@ -445,7 +451,7 @@ class HomeController extends Controller
         $now = now();
 
         // Override status based on endTime comparison
-        if ($auction->endTime && $auction->endTime < $now) {
+        if ($auction->endTime && ($auction->endTime < $now)) {
             $auction->status = 'ended';
 
             // Check if auction has ended but no winner is set yet
@@ -462,11 +468,38 @@ class HomeController extends Controller
             }
         }
 
-        if ($auction->status === 'active' && $auction->endTime > $now) {
-            $totalDuration = $auction->endTime->diffInSeconds($auction->startTime);
-            $elapsed = $now->diffInSeconds($auction->startTime);
-            $timeProgress = ($elapsed / $totalDuration) * 100;
-            $timeLeft = $now->diffForHumans($auction->endTime, ['parts' => 2]);
+        // Calculate time remaining for active/upcoming auctions
+        if ($auction->endTime && $auction->startTime) {
+            // Check if current time has exceeded end time
+            if ($now >= $auction->endTime) {
+                // Auction time has expired - show ENDED
+                $auction->status = 'ended';
+                $timeProgress = 100;
+                $timeLeft = 'ENDED';
+            } elseif ($now >= $auction->startTime && $now < $auction->endTime) {
+                // Auction is currently running - show countdown
+                // Calculate total duration from start to end
+                $totalDuration = $auction->startTime->diffInSeconds($auction->endTime);
+
+                // Calculate elapsed time from start to now
+                $elapsed = $auction->startTime->diffInSeconds($now);
+
+                // Calculate progress (0-100%)
+                if ($totalDuration > 0) {
+                    $timeProgress = min(100, max(0, ($elapsed / $totalDuration) * 100));
+                }
+
+                // Calculate time remaining (from now to endTime)
+                $secondsLeft = $now->diffInSeconds($auction->endTime);
+                $timeLeft = $this->formatTimeRemaining($secondsLeft);
+            } elseif ($now < $auction->startTime) {
+                // Auction hasn't started yet
+                $auction->status = 'upcoming';
+                $timeProgress = 0;
+                // Show countdown to start time
+                $secondsUntilStart = $now->diffInSeconds($auction->startTime);
+                $timeLeft = 'Starts in ' . $this->formatTimeRemaining($secondsUntilStart);
+            }
         }
 
         // Calculate savings percentage
@@ -721,12 +754,48 @@ class HomeController extends Controller
     private function getSliderData()
     {
         $configPath = storage_path('app/slider-config.json');
-        
+
         if (File::exists($configPath)) {
             $content = File::get($configPath);
             return json_decode($content, true) ?? [];
         }
 
         return [];
+    }
+
+    /**
+     * Format seconds into readable time remaining string
+     *
+     * @param int|float $seconds
+     * @return string
+     */
+    private function formatTimeRemaining($seconds)
+    {
+        // Convert to integer to avoid float precision issues
+        $seconds = (int) $seconds;
+
+        if ($seconds <= 0) {
+            return 'ENDED';
+        }
+
+        $days = floor($seconds / 86400);
+        $hours = floor(($seconds % 86400) / 3600);
+        $minutes = floor(($seconds % 3600) / 60);
+        $secs = $seconds % 60;
+
+        $parts = [];
+
+        if ($days > 0) {
+            $parts[] = $days . 'd';
+        }
+        if ($hours > 0 || $days > 0) {
+            $parts[] = $hours . 'h';
+        }
+        if ($minutes > 0 || $hours > 0 || $days > 0) {
+            $parts[] = $minutes . 'm';
+        }
+        $parts[] = $secs . 's';
+
+        return implode(' ', $parts);
     }
 }

@@ -941,10 +941,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to initialize and run the countdown timer
     function initializeCountdownTimer() {
         @if($auction->status === 'active' && $auction->endTime > now())
-            // Parse auction end time
-            const endTime = new Date("{{ $auction->endTime }}").getTime();
-            const startTime = new Date("{{ $auction->startTime }}").getTime();
+            // Parse auction end time (use ISO format for better compatibility)
+            const endTime = new Date("{{ $auction->endTime->toIso8601String() }}").getTime();
+            const startTime = new Date("{{ $auction->startTime->toIso8601String() }}").getTime();
             const totalDuration = endTime - startTime;
+
+            console.log('Countdown Timer Debug:');
+            console.log('End Time:', new Date(endTime));
+            console.log('Start Time:', new Date(startTime));
+            console.log('Current Time:', new Date());
+            console.log('Time Remaining (ms):', endTime - new Date().getTime());
 
             // Update the timer every second
             const timerInterval = setInterval(function() {
@@ -964,7 +970,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Reload page to show ended auction state
                     setTimeout(() => {
                         window.location.reload();
-                    }, 3000);
+                    }, 2000);
 
                     return;
                 }
@@ -1007,9 +1013,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 progressBar.style.width = progress + "%";
 
             }, 1000);
+
+            // Auto-refresh page every 3 seconds to get latest auction data
+            setInterval(function() {
+                window.location.reload();
+            }, 3000);
         @endif
     }
-    
+
     // Handle bid button click
     const bidButton = document.querySelector('.btn-bid');
     if (bidButton) {
