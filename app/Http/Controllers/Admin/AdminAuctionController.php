@@ -283,9 +283,9 @@ class AdminAuctionController extends Controller
             return redirect()->back()->with('error', "Cannot change auction status from {$currentStatus} to {$newStatus}");
         }
 
-        // Special case for activating an auction: check if startTime is in the past
+        // Validate start time when activating an auction (startTime must be <= now)
         if ($newStatus === 'active' && $auction->startTime > now()) {
-            $auction->startTime = now();
+            return redirect()->back()->with('error', 'Cannot activate auction! The start time is in the future. Please wait until the start time or edit the auction to change the start time.');
         }
 
         // Special case for ending an auction: set the endTime to now

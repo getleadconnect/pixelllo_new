@@ -62,11 +62,11 @@
                     <h4 style="margin-bottom: 15px;">Auction Actions</h4>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         @if ($auction->status == 'upcoming')
-                            <form action="{{ url('/admin/auctions/' . $auction->id . '/status') }}" method="POST">
+                            <form action="{{ url('/admin/auctions/' . $auction->id . '/status') }}" method="POST" id="activate-auction-form">
                                 @csrf
                                 @method('PATCH')
                                 <input type="hidden" name="status" value="active">
-                                <button type="submit" class="btn btn-success" style="width: 100%;">
+                                <button type="button" class="btn btn-success" style="width: 100%;" onclick="validateAndActivateAuction(event)">
                                     <i class="fas fa-play mr-2"></i> Activate Auction
                                 </button>
                             </form>
@@ -249,7 +249,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         const thumbnails = document.querySelectorAll('.admin-data-card-body img[style*="width: 80px"]');
         const mainImage = document.querySelector('.admin-data-card-body img[style*="width: 100%"]');
-        
+
         if (thumbnails.length > 0 && mainImage) {
             thumbnails.forEach(thumb => {
                 thumb.addEventListener('click', function() {
@@ -258,5 +258,63 @@
             });
         }
     });
+
+    // Validate auction start time before activating
+    function validateAndActivateAuction(event) {
+        event.preventDefault();
+
+        // Get auction start time from backend
+        const startTime = new Date("{{ $auction->startTime->toIso8601String() }}");
+        const currentTime = new Date();
+
+        // Check if start time is in the future (startTime > now)
+        if (startTime > currentTime) {
+            // Calculate time difference
+            const diffMs = startTime - currentTime;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+
+            let timeMessage = '';
+            if (diffDays > 0) {
+                timeMessage = diffDays + ' day(s)';
+            } else if (diffHours > 0) {
+                timeMessage = diffHours + ' hour(s)';
+            } else {
+                timeMessage = diffMins + ' minute(s)';
+            }
+
+            // Show SweetAlert error message
+            Swal.fire({
+                icon: 'error',
+                title: 'Cannot Activate Auction!',
+                html: '<p>The start time is <strong>' + timeMessage + '</strong> in the future.</p>' +
+                      '<hr>' +
+                      '<p><strong>Start Time:</strong> ' + startTime.toLocaleString() + '</p>' +
+                      '<p><strong>Current Time:</strong> ' + currentTime.toLocaleString() + '</p>' +
+                      '<hr>' +
+                      '<p>Please wait until the start time or edit the auction to change the start time.</p>',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#3085d6'
+            });
+            return false;
+        }
+
+        // If validation passes (startTime <= now), show confirmation and submit
+        Swal.fire({
+            icon: 'question',
+            title: 'Activate Auction?',
+            text: 'Are you sure you want to activate this auction?',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Activate',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('activate-auction-form').submit();
+            }
+        });
+    }
 </script>
 @endsection
