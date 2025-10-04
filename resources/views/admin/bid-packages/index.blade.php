@@ -9,160 +9,6 @@
 @endsection
 
 @section('content')
-<div class="admin-data-card">
-    <div class="admin-data-card-header">
-        <div class="admin-data-card-title">All Bid Packages</div>
-        <div class="admin-data-card-actions">
-            <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#createPackageModal">
-                <i class="fas fa-plus"></i> Add New Package
-            </button>
-        </div>
-    </div>
-    <div class="admin-data-card-body">
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
-
-        <div class="table-responsive" >
-            <table id="packagesTable" class="datatable" style="width:100%;">
-                <thead>
-                    <tr>
-                        <th>Sl.No</th>
-                        <th>Name</th>
-                        <th>Bid Amount</th>
-                        <th>Price (AED)</th>
-                        <th>Description</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($packages as $index => $package)
-                    <tr>
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ $package->name }}</td>
-                        <td>{{ number_format($package->bidAmount) }} bids</td>
-                        <td>AED {{ number_format($package->price, 2) }}</td>
-                        <td>{{ $package->description ?? '-' }}</td>
-                        <td>
-                            <span class="badge-status {{ $package->isActive ? 'badge-active' : 'badge-inactive' }}">
-                                {{ $package->isActive ? 'Active' : 'Inactive' }}
-                            </span>
-                        </td>
-                        <td>
-                            <button type="button" class="btn btn-sm btn-primary edit-package-btn"
-                                data-id="{{ $package->id }}"
-                                data-name="{{ $package->name }}"
-                                data-bidamount="{{ $package->bidAmount }}"
-                                data-price="{{ $package->price }}"
-                                data-description="{{ $package->description }}"
-                                data-isactive="{{ $package->isActive ? '1' : '0' }}">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                            <button type="button" class="btn btn-sm btn-danger delete-package-btn" data-id="{{ $package->id }}">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="7" style="text-align: center; padding: 40px; color: #999;">
-                            No bid packages found. Create your first package to get started.
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<!-- Create Package Modal -->
-<div class="modal fade" id="createPackageModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Create New Bid Package</h5>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-            </div>
-            <form id="createPackageForm" method="POST" action="{{ route('admin.bid-packages.store') }}">
-                @csrf
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="create_name">Package Name <span style="color: red;">*</span></label>
-                        <input type="text" name="name" id="create_name" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="create_bidAmount">Bid Amount <span style="color: red;">*</span></label>
-                        <input type="number" name="bidAmount" id="create_bidAmount" class="form-control" required min="1">
-                    </div>
-                    <div class="form-group">
-                        <label for="create_price">Price (AED) <span style="color: red;">*</span></label>
-                        <input type="number" name="price" id="create_price" class="form-control" step="0.01" min="0" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="create_description">Description</label>
-                        <textarea name="description" id="create_description" class="form-control" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <div class="form-check">
-                            <input type="checkbox" name="isActive" id="create_isActive" class="form-check-input" value="1" checked>
-                            <label for="create_isActive" class="form-check-label">Active</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Create Package</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Edit Package Modal -->
-<div class="modal fade" id="editPackageModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Edit Bid Package</h5>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-            </div>
-            <form id="editPackageForm" method="POST">
-                @csrf
-                @method('PUT')
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="edit_name">Package Name <span style="color: red;">*</span></label>
-                        <input type="text" name="name" id="edit_name" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_bidAmount">Bid Amount <span style="color: red;">*</span></label>
-                        <input type="number" name="bidAmount" id="edit_bidAmount" class="form-control" required min="1">
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_price">Price (AED) <span style="color: red;">*</span></label>
-                        <input type="number" name="price" id="edit_price" class="form-control" step="0.01" min="0" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_description">Description</label>
-                        <textarea name="description" id="edit_description" class="form-control" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <div class="form-check">
-                            <input type="checkbox" name="isActive" id="edit_isActive" class="form-check-input" value="1">
-                            <label for="edit_isActive" class="form-check-label">Active</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Update Package</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 <style>
 .badge-status {
@@ -275,6 +121,164 @@
     text-align: right;
 }
 </style>
+
+
+<div class="admin-data-card">
+    <div class="admin-data-card-header">
+        <div class="admin-data-card-title">All Bid Packages</div>
+        <div class="admin-data-card-actions">
+            <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#createPackageModal">
+                <i class="fas fa-plus"></i> Add New Package
+            </button>
+        </div>
+    </div>
+    <div class="admin-data-card-body">
+        @if(session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+
+        <div class="table-responsive" >
+            <table id="packagesTable" class="datatable" style="width:100%;">
+                <thead>
+                    <tr>
+                        <th>Sl.No</th>
+                        <th>Name</th>
+                        <th>Bid Amount</th>
+                        <th>Price (AED)</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @forelse($packages as $index => $package)
+                    <tr>
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $package->name }}</td>
+                        <td>{{ number_format($package->bidAmount) }} bids</td>
+                        <td>AED {{ number_format($package->price, 2) }}</td>
+                        <td>{{ $package->description ?? '-' }}</td>
+                        <td>
+                            <span class="badge-status {{ $package->isActive ? 'badge-active' : 'badge-inactive' }}">
+                                {{ $package->isActive ? 'Active' : 'Inactive' }}
+                            </span>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-primary edit-package-btn"
+                                data-id="{{ $package->id }}"
+                                data-name="{{ $package->name }}"
+                                data-bidamount="{{ $package->bidAmount }}"
+                                data-price="{{ $package->price }}"
+                                data-description="{{ $package->description }}"
+                                data-isactive="{{ $package->isActive ? '1' : '0' }}">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger delete-package-btn" data-id="{{ $package->id }}">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                @empty
+                <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: #999;">
+                            No bid packages found. Create your first package to get started.
+                        </td>
+                    </tr>
+
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Create Package Modal -->
+<div class="modal fade" id="createPackageModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Bid Package</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <form id="createPackageForm" method="POST" action="{{ route('admin.bid-packages.store') }}">
+                @csrf
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="create_name">Package Name <span style="color: red;">*</span></label>
+                        <input type="text" name="name" id="create_name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="create_bidAmount">Bid Amount <span style="color: red;">*</span></label>
+                        <input type="number" name="bidAmount" id="create_bidAmount" class="form-control" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="create_price">Price (AED) <span style="color: red;">*</span></label>
+                        <input type="number" name="price" id="create_price" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="create_description">Description</label>
+                        <textarea name="description" id="create_description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input type="checkbox" name="isActive" id="create_isActive" class="form-check-input" value="1" checked>
+                            <label for="create_isActive" class="form-check-label">Active</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Package</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Package Modal -->
+<div class="modal fade" id="editPackageModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Bid Package</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <form id="editPackageForm" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="edit_name">Package Name <span style="color: red;">*</span></label>
+                        <input type="text" name="name" id="edit_name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_bidAmount">Bid Amount <span style="color: red;">*</span></label>
+                        <input type="number" name="bidAmount" id="edit_bidAmount" class="form-control" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_price">Price (AED) <span style="color: red;">*</span></label>
+                        <input type="number" name="price" id="edit_price" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_description">Description</label>
+                        <textarea name="description" id="edit_description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input type="checkbox" name="isActive" id="edit_isActive" class="form-check-input" value="1">
+                            <label for="edit_isActive" class="form-check-label">Active</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Package</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 
 @endsection
 
