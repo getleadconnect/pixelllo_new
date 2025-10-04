@@ -222,9 +222,9 @@
         .topbar-user-content {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
             background-color: white;
-            padding: 8px 15px 8px 8px;
+            padding: 8px 15px 8px 25px;
             border-radius: 50px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             transition: all 0.2s ease;
