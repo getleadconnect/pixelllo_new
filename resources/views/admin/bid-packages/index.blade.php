@@ -291,33 +291,37 @@
 
 <script>
 $(document).ready(function() {
-    // Initialize DataTable
-    var table = $('#packagesTable').DataTable({
-        "pageLength": 10,
-        "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
-        "order": [[2, "asc"]], // Sort by Bid Amount ascending (column index 2)
-        "columnDefs": [
-            { "orderable": false, "targets": [0, 6] }, // Disable sorting on Sl.No and Actions columns
-            { "searchable": false, "targets": [0] } // Disable search on Sl.No column
-        ],
-        "language": {
-            "search": "Search:",
-            "lengthMenu": "Show _MENU_ entries",
-            "info": "Showing _START_ to _END_ of _TOTAL_ packages",
-            "infoEmpty": "No packages available",
-            "infoFiltered": "(filtered from _MAX_ total packages)",
-            "zeroRecords": "No matching packages found",
-            "paginate": {
-                "first": "First",
-                "last": "Last",
-                "next": "Next",
-                "previous": "Previous"
-            }
-        },
-        
-        "searching": true,
-        "autoWidth": false
-    });
+    // Check if table has data rows (not just the empty message)
+    var hasData = $('#packagesTable tbody tr').length > 0 && !$('#packagesTable tbody tr td[colspan]').length;
+
+    // Only initialize DataTable if there's data
+    if (hasData) {
+        var table = $('#packagesTable').DataTable({
+            "pageLength": 10,
+            "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+            "order": [[2, "asc"]], // Sort by Bid Amount ascending (column index 2)
+            "columnDefs": [
+                { "orderable": false, "targets": [0, 6] }, // Disable sorting on Sl.No and Actions columns
+                { "searchable": false, "targets": [0] } // Disable search on Sl.No column
+            ],
+            "language": {
+                "search": "Search:",
+                "lengthMenu": "Show _MENU_ entries",
+                "info": "Showing _START_ to _END_ of _TOTAL_ packages",
+                "infoEmpty": "No packages available",
+                "infoFiltered": "(filtered from _MAX_ total packages)",
+                "zeroRecords": "No matching packages found",
+                "paginate": {
+                    "first": "First",
+                    "last": "Last",
+                    "next": "Next",
+                    "previous": "Previous"
+                }
+            },
+            "searching": true,
+            "autoWidth": false
+        });
+    }
 
     // Create modal toggle
     const createModal = document.getElementById('createPackageModal');
