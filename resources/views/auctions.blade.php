@@ -438,16 +438,54 @@
         <div class="auctions-grid">
             @forelse($auctions as $auction)
             @php
-                $isActive = $auction->status === 'active';
-                $isClosed = $auction->status === 'ended' || $auction->endTime < now();
-                $isEndingSoon = $isActive && $auction->endTime->diffInHours(now()) < 24;
-                $timeLeft = now()->diffForHumans($auction->endTime, ['parts' => 1]);
-                $urgentTime = $auction->endTime->diffInMinutes(now()) < 10 && $isActive;
+                $now = now();
+                $isActive = $auction->status === 'active' && $auction->endTime > $now;
+                $isClosed = $auction->status === 'ended' || $auction->endTime < $now;
+                $isEndingSoon = $isActive && $auction->endTime->diffInHours($now) < 24;
 
-                // Calculate progress
-                $totalDuration = $auction->endTime->diffInSeconds($auction->startTime);
-                $elapsed = now()->diffInSeconds($auction->startTime);
-                $progress = min(100, max(0, ($elapsed / $totalDuration) * 100));
+                // Calculate time remaining using proper logic from home page
+                $timeLeft = '';
+                $timeProgress = 0;
+
+                if ($auction->endTime && $auction->startTime) {
+                    if ($now >= $auction->endTime) {
+                        // Auction has ended
+                        $timeProgress = 100;
+                        $timeLeft = 'ENDED';
+                    } elseif ($now >= $auction->startTime && $now < $auction->endTime) {
+                        // Auction is running - calculate proper countdown
+                        $totalDuration = $auction->startTime->diffInSeconds($auction->endTime);
+                        $elapsed = $auction->startTime->diffInSeconds($now);
+
+                        if ($totalDuration > 0) {
+                            $timeProgress = min(100, max(0, ($elapsed / $totalDuration) * 100));
+                        }
+
+                        // Calculate time remaining in seconds
+                        $secondsLeft = $now->diffInSeconds($auction->endTime);
+
+                        // Format time remaining
+                        $days = floor($secondsLeft / 86400);
+                        $hours = floor(($secondsLeft % 86400) / 3600);
+                        $minutes = floor(($secondsLeft % 3600) / 60);
+                        $secs = $secondsLeft % 60;
+
+                        $parts = [];
+                        if ($days > 0) $parts[] = $days . 'd';
+                        if ($hours > 0 || $days > 0) $parts[] = $hours . 'h';
+                        if ($minutes > 0 || $hours > 0 || $days > 0) $parts[] = $minutes . 'm';
+                        $parts[] = $secs . 's';
+
+                        $timeLeft = implode(' ', $parts);
+                    } elseif ($now < $auction->startTime) {
+                        // Upcoming auction
+                        $timeProgress = 0;
+                        $timeLeft = 'Not Started';
+                    }
+                }
+
+                $urgentTime = isset($secondsLeft) && $secondsLeft < 600 && $isActive; // Less than 10 minutes
+                $progress = $timeProgress;
 
                 // Calculate savings
                 $savings = 0;
