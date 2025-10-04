@@ -20,12 +20,6 @@ class HomeController extends Controller
      *
      * @return \Illuminate\View\View
      */
-
-public function __construct()
-{
-    date_default_timezone_set('Asia/Kolkata');
-}
-
     public function index()
     {
         // Get featured auctions (ensure they're active and not ended)

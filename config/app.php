@@ -66,8 +66,8 @@ return [
     */
 
     //'timezone' => 'UTC',
-    'timezone'=>'Asia/Kolkata',
-
+    'timezone'=>'Asia/Dubai',
+    
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration
