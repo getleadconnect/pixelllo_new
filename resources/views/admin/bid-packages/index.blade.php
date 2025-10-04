@@ -151,7 +151,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                @forelse($packages as $index => $package)
+                @if(!$packages->isEmpty())
+
+                @foreach($packages as $index => $package)
                     <tr>
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $package->name }}</td>
@@ -178,14 +180,15 @@
                             </button>
                         </td>
                     </tr>
-                @empty
+                @endforeach
+                @else
                 <tr>
                         <td colspan="7" style="text-align: center; padding: 40px; color: #999;">
                             No bid packages found. Create your first package to get started.
                         </td>
                     </tr>
 
-                @endforelse
+                @endif
                 </tbody>
             </table>
         </div>
@@ -311,7 +314,7 @@ $(document).ready(function() {
                 "previous": "Previous"
             }
         },
-        "dom": '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+        
         "searching": true,
         "autoWidth": false
     });
