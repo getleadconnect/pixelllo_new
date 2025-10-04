@@ -352,7 +352,7 @@
             font-weight: 600;
             margin-bottom: 12px;
             color: var(--dark);
-            height: 2.7rem;
+            line-height: 1.5;
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;
@@ -1053,19 +1053,56 @@
                     <div class="auctions-grid">
                         @forelse($featuredAuctions as $auction)
                         @php
-                            $isActive = $auction->status === 'active' && $auction->endTime > now();
-                            $isClosed = $auction->status === 'ended' || $auction->endTime < now();
-                            
+                            $now = now();
+                            $isActive = $auction->status === 'active' && $auction->endTime > $now;
+                            $isClosed = $auction->status === 'ended' || $auction->endTime < $now;
+
                             // Skip closed auctions in the Live tab
                             if ($isClosed) continue;
-                            $timeLeft = now()->diffForHumans($auction->endTime, ['parts' => 1]);
-                            $urgentTime = $auction->endTime->diffInMinutes(now()) < 10 && $isActive;
-                            
-                            // Calculate progress
-                            $totalDuration = $auction->endTime->diffInSeconds($auction->startTime);
-                            $elapsed = now()->diffInSeconds($auction->startTime);
-                            $progress = min(100, max(0, ($elapsed / $totalDuration) * 100));
-                            
+
+                            // Calculate time remaining using proper logic from auctionDetail
+                            $timeLeft = '';
+                            $timeProgress = 0;
+
+                            if ($auction->endTime && $auction->startTime) {
+                                if ($now >= $auction->endTime) {
+                                    // Auction has ended
+                                    $timeProgress = 100;
+                                    $timeLeft = 'ENDED';
+                                } elseif ($now >= $auction->startTime && $now < $auction->endTime) {
+                                    // Auction is running - calculate proper countdown
+                                    $totalDuration = $auction->startTime->diffInSeconds($auction->endTime);
+                                    $elapsed = $auction->startTime->diffInSeconds($now);
+
+                                    if ($totalDuration > 0) {
+                                        $timeProgress = min(100, max(0, ($elapsed / $totalDuration) * 100));
+                                    }
+
+                                    // Calculate time remaining in seconds
+                                    $secondsLeft = $now->diffInSeconds($auction->endTime);
+
+                                    // Format time remaining
+                                    $days = floor($secondsLeft / 86400);
+                                    $hours = floor(($secondsLeft % 86400) / 3600);
+                                    $minutes = floor(($secondsLeft % 3600) / 60);
+                                    $secs = $secondsLeft % 60;
+
+                                    $parts = [];
+                                    if ($days > 0) $parts[] = $days . 'd';
+                                    if ($hours > 0 || $days > 0) $parts[] = $hours . 'h';
+                                    if ($minutes > 0 || $hours > 0 || $days > 0) $parts[] = $minutes . 'm';
+                                    $parts[] = $secs . 's';
+
+                                    $timeLeft = implode(' ', $parts);
+                                } elseif ($now < $auction->startTime) {
+                                    // Upcoming auction
+                                    $timeProgress = 0;
+                                    $timeLeft = 'Not Started';
+                                }
+                            }
+
+                            $urgentTime = isset($secondsLeft) && $secondsLeft < 600 && $isActive; // Less than 10 minutes
+
                             // Calculate savings
                             $savings = 0;
                             if ($auction->retailPrice > 0 && $auction->currentPrice > 0) {
@@ -1089,7 +1126,9 @@
                             </div>
                             <div class="auction-content">
                                 <div class="auction-category">{{ $auction->category->name }}</div>
-                                <h3 class="auction-title"><a href="{{ route('auction.detail', $auction->id) }}">{{ $auction->title }}</a></h3>
+                                <h3 class="auction-title">
+                                    <a href="{{ route('auction.detail', $auction->id) }}">{{ $auction->title }}</a>
+                                </h3>
                                 <div class="auction-info">
                                     <span class="auction-price">Current Bid: ${{ number_format($auction->currentPrice, 2) }}</span>
                                     <span class="auction-time {{ $urgentTime ? 'urgent' : '' }}">
@@ -1105,7 +1144,7 @@
                                     </span>
                                 </div>
                                 <div class="auction-progress">
-                                    <div class="progress-bar" style="width: {{ $progress }}%;"></div>
+                                    <div class="progress-bar" style="width: {{ $timeProgress }}%;"></div>
                                 </div>
                                 <div class="auction-retail">
                                     <span class="retail-price">Retail Price: ${{ number_format($auction->retailPrice, 2) }}</span>

@@ -16,7 +16,33 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## IMPORTANT: Server-Only Development
 **This project is deployed on a production server. All fixes and updates should be focused on server deployment only. Do not test or configure for local development environments.**
 
-## Recent Updates (June 2025)
+## Recent Updates
+
+### October 3, 2025
+- **Time Remaining Fix**: Fixed auction detail page to correctly display time remaining countdown
+  - Updated `HomeController::auctionDetail()` to properly calculate time remaining using `now()->diffInSeconds($auction->endTime)`
+  - Added `formatTimeRemaining()` helper method to format seconds into readable format (Xd Yh Zm As)
+  - Fixed progress bar calculation to accurately reflect elapsed time percentage
+  - Time now shows "ENDED" only when `now >= endTime`, otherwise displays live countdown
+  - Added proper validation for three states: ended (now >= endTime), running (startTime <= now < endTime), upcoming (now < startTime)
+  - Updated JavaScript countdown timer to use ISO 8601 date format for better browser compatibility
+  - Added auto-refresh every 3 seconds on auction detail page for real-time updates
+
+- **Timezone Configuration**: Set default timezone to 'Asia/Kolkata' in `HomeController` constructor
+
+- **Admin Auction Activation Validation**: Added validation to prevent activating auctions before their start time
+  - Frontend validation using SweetAlert2 with beautiful popup messages
+  - Backend validation in `AdminAuctionController::updateStatus()` to check `startTime <= now()`
+  - Shows detailed error message with time difference (days/hours/minutes) when start time is in the future
+  - Displays confirmation dialog before activating auction when validation passes
+  - Removed automatic `startTime` modification when activating auctions (startTime remains unchanged)
+
+- **SweetAlert2 Integration**: Added SweetAlert2 library to admin panel for enhanced user notifications
+  - Added CSS: `https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css`
+  - Added JS: `https://cdn.jsdelivr.net/npm/sweetalert2@11`
+  - Used for auction activation validation messages
+
+### June 2025
 - **IPv6 Enabled**: Server now supports IPv6 for Supabase PostgreSQL connection
 - **Row Level Security**: All database tables have RLS enabled with permissive policies
 - **Database**: Successfully migrated from SQLite to PostgreSQL (Supabase hosted)
