@@ -22,12 +22,12 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
             <div style="background-color: rgba(40, 167, 69, 0.1); padding: 20px; border-radius: 8px; text-align: center;">
                 <h5 style="color: #28a745; margin-bottom: 10px;">Total Revenue</h5>
-                <p style="font-size: 1.8rem; font-weight: 700; margin: 0;">${{ number_format($totalRevenue ?? 0, 2) }}</p>
+                <p style="font-size: 1.8rem; font-weight: 700; margin: 0;">AED {{ number_format($totalRevenue ?? 0, 2) }}</p>
             </div>
             
             <div style="background-color: rgba(23, 162, 184, 0.1); padding: 20px; border-radius: 8px; text-align: center;">
                 <h5 style="color: #17a2b8; margin-bottom: 10px;">Average Order Value</h5>
-                <p style="font-size: 1.8rem; font-weight: 700; margin: 0;">${{ number_format($avgOrderValue ?? 0, 2) }}</p>
+                <p style="font-size: 1.8rem; font-weight: 700; margin: 0;">AED {{ number_format($avgOrderValue ?? 0, 2) }}</p>
             </div>
             
             <div style="background-color: rgba(255, 153, 0, 0.1); padding: 20px; border-radius: 8px; text-align: center;">
@@ -90,7 +90,7 @@
                         @forelse ($salesByCategory ?? [] as $category)
                             <tr>
                                 <td>{{ $category->category_name ?? 'Uncategorized' }}</td>
-                                <td>${{ number_format($category->revenue ?? 0, 2) }}</td>
+                                <td>AED {{ number_format($category->revenue ?? 0, 2) }}</td>
                                 <td>{{ number_format($category->order_count ?? 0) }}</td>
                                 <td>${{ $category->order_count > 0 ? number_format($category->revenue / $category->order_count, 2) : '0.00' }}</td>
                             </tr>

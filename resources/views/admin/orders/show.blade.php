@@ -53,8 +53,8 @@
                         </div>
                         <div style="flex: 1;">
                             <h4 style="margin-bottom: 10px;">{{ $order->auction->title ?? 'Unknown Auction' }}</h4>
-                            <p style="color: #777; margin-bottom: 5px;">Won at final price: <strong>${{ number_format($order->auction->currentPrice ?? 0, 2) }}</strong></p>
-                            <p style="color: #777; margin-bottom: 5px;">Retail price: <strong>${{ number_format($order->auction->retailPrice ?? 0, 2) }}</strong></p>
+                            <p style="color: #777; margin-bottom: 5px;">Won at final price: <strong>AED {{ number_format($order->auction->currentPrice ?? 0, 2) }}</strong></p>
+                            <p style="color: #777; margin-bottom: 5px;">Retail price: <strong>AED {{ number_format($order->auction->retailPrice ?? 0, 2) }}</strong></p>
                             <p style="color: #777; margin-bottom: 0;">Savings: <strong>{{ $order->auction && $order->auction->retailPrice ? number_format(100 - (($order->auction->currentPrice / $order->auction->retailPrice) * 100), 0) : 0 }}%</strong></p>
                         </div>
                     </div>
@@ -65,19 +65,19 @@
                     <h4 style="margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">Order Summary</h4>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                         <div>Item Price:</div>
-                        <div>${{ number_format($order->subtotal, 2) }}</div>
+                        <div>AED {{ number_format($order->subtotal, 2) }}</div>
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                         <div>Shipping & Handling:</div>
-                        <div>${{ number_format($order->shipping_cost, 2) }}</div>
+                        <div>AED {{ number_format($order->shipping_cost, 2) }}</div>
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                         <div>Tax:</div>
-                        <div>${{ number_format($order->tax, 2) }}</div>
+                        <div>AED {{ number_format($order->tax, 2) }}</div>
                     </div>
                     <div style="display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px solid #eee; font-weight: 700;">
                         <div>Order Total:</div>
-                        <div>${{ number_format($order->total, 2) }}</div>
+                        <div>AED {{ number_format($order->total, 2) }}</div>
                     </div>
                 </div>
                 

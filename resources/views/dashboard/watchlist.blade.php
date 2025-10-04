@@ -154,8 +154,8 @@
                     <div class="auction-item-info">
                         <div class="auction-progress-container">
                             <div class="progress-stats">
-                                <span>Current Bid: <strong>${{ number_format($auction->currentPrice, 2) }}</strong></span>
-                                <span>Retail: <strong>${{ number_format($auction->retailPrice, 2) }}</strong></span>
+                                <span>Current Bid: <strong>AED {{ number_format($auction->currentPrice, 2) }}</strong></span>
+                                <span>Retail: <strong>AED {{ number_format($auction->retailPrice, 2) }}</strong></span>
                             </div>
                             @if($auction->status === 'active')
                             <div class="auction-progress">

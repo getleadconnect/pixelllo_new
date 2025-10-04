@@ -184,11 +184,11 @@
             </div>
             <div class="summary-item">
                 <span>Retail Price:</span>
-                <span>${{ number_format($auction->retailPrice, 2) }}</span>
+                <span>AED {{ number_format($auction->retailPrice, 2) }}</span>
             </div>
             <div class="summary-item">
                 <span>Final Bid Price:</span>
-                <span>${{ number_format($auction->currentPrice, 2) }}</span>
+                <span>AED {{ number_format($auction->currentPrice, 2) }}</span>
             </div>
         </div>
 
@@ -273,7 +273,7 @@
 
                 <div class="calc-row">
                     <span>Subtotal (Final Bid Price):</span>
-                    <span id="subtotal">${{ number_format($auction->currentPrice, 2) }}</span>
+                    <span id="subtotal">AED {{ number_format($auction->currentPrice, 2) }}</span>
                 </div>
 
                 <div class="form-group">
@@ -326,7 +326,7 @@
 
                 <div class="calc-row total">
                     <span>Total Amount:</span>
-                    <span id="total_amount">${{ number_format($auction->currentPrice, 2) }}</span>
+                    <span id="total_amount">AED {{ number_format($auction->currentPrice, 2) }}</span>
                 </div>
             </div>
 

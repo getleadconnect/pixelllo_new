@@ -637,7 +637,7 @@
                     <div class="specs-content">
                         <ul>
                             <li><strong>Category:</strong> {{ $auction->category->name }}</li>
-                            <li><strong>Retail Price:</strong> ${{ number_format($auction->retailPrice, 2) }}</li>
+                            <li><strong>Retail Price:</strong> AED {{ number_format($auction->retailPrice, 2) }}</li>
                             <li><strong>Status:</strong> {{ ucfirst($auction->status) }}</li>
                             <!-- Add more specification fields here -->
                         </ul>
@@ -657,11 +657,11 @@
                         <div class="auction-price-container">
                             <div class="current-price">
                                 <span class="price-label">Current Bid:</span>
-                                <span class="price-value">${{ number_format($auction->currentPrice, 2) }}</span>
+                                <span class="price-value">AED {{ number_format($auction->currentPrice, 2) }}</span>
                             </div>
                             <div class="retail-price">
                                 <span class="price-label">Retail Price:</span>
-                                <span class="price-value">${{ number_format($auction->retailPrice, 2) }}</span>
+                                <span class="price-value">AED {{ number_format($auction->retailPrice, 2) }}</span>
                             </div>
                             <div class="savings">
                                 <span class="savings-label">You Save:</span>
@@ -685,7 +685,7 @@
                                 <span class="stat-label">Bids</span>
                             </div>
                             <div class="stat">
-                                <span class="stat-value">${{ number_format($auction->bidIncrement, 2) }}</span>
+                                <span class="stat-value">AED {{ number_format($auction->bidIncrement, 2) }}</span>
                                 <span class="stat-label">Bid Increment</span>
                             </div>
                             <div class="stat">
@@ -714,11 +714,11 @@
                             <div class="auction-price-container">
                                 <div class="current-price">
                                     <span class="price-label">Final Price:</span>
-                                    <span class="price-value">${{ number_format($auction->currentPrice, 2) }}</span>
+                                    <span class="price-value">AED {{ number_format($auction->currentPrice, 2) }}</span>
                                 </div>
                                 <div class="retail-price">
                                     <span class="price-label">Retail Price:</span>
-                                    <span class="price-value">${{ number_format($auction->retailPrice, 2) }}</span>
+                                    <span class="price-value">AED {{ number_format($auction->retailPrice, 2) }}</span>
                                 </div>
                             </div>
                             <p style="margin-top: 20px; color: #666;">This auction ended on {{ $auction->endTime->format('F j, Y \a\t g:i A') }}</p>
@@ -731,11 +731,11 @@
                                         Winner: {{ $auction->winner->name }}
                                     </p>
                                     <p style="color: #155724;">
-                                        Winning bid: ${{ number_format($auction->currentPrice, 2) }}
+                                        Winning bid: AED {{ number_format($auction->currentPrice, 2) }}
                                     </p>
                                 </div>
                             @elseif($auction->bids->count() > 0)
-                                <p style="color: #27ae60; font-weight: 600;">Winning bid: ${{ number_format($auction->currentPrice, 2) }}</p>
+                                <p style="color: #27ae60; font-weight: 600;">Winning bid: AED {{ number_format($auction->currentPrice, 2) }}</p>
                             @else
                                 <p style="color: #999;">No bids were placed on this auction.</p>
                             @endif
@@ -758,7 +758,7 @@
                                                 Anonymous
                                             @endif
                                         </span>
-                                        <span class="bid-price">${{ number_format($bid->amount, 2) }}</span>
+                                        <span class="bid-price">AED {{ number_format($bid->amount, 2) }}</span>
                                     </div>
                                     <div class="bid-time">{{ $bid->created_at->diffForHumans() }}</div>
                                 </li>
@@ -803,7 +803,7 @@
                     <div class="info-item">
                         <div class="info-icon"><i class="fas fa-gavel"></i></div>
                         <h4>Place Your Bid</h4>
-                        <p>Each bid costs one bid credit and raises the price by just ${{ number_format($auction->bidIncrement, 2) }}.</p>
+                        <p>Each bid costs one bid credit and raises the price by just AED {{ number_format($auction->bidIncrement, 2) }}.</p>
                     </div>
                     <div class="info-item">
                         <div class="info-icon"><i class="fas fa-clock"></i></div>
@@ -864,7 +864,7 @@
                             <div class="auction-category">{{ $similarAuction->category->name }}</div>
                             <h3 class="auction-title">{{ $similarAuction->title }}</h3>
                             <div class="auction-info">
-                                <span class="auction-price">Current Bid: ${{ number_format($similarAuction->currentPrice, 2) }}</span>
+                                <span class="auction-price">Current Bid: AED {{ number_format($similarAuction->currentPrice, 2) }}</span>
                                 <span class="auction-time"><i class="fas fa-clock"></i> {{ now()->diffForHumans($similarAuction->endTime, ['parts' => 1]) }}</span>
                             </div>
                             <div class="auction-progress">
@@ -877,7 +877,7 @@
                                 <div class="progress-bar" style="width: {{ $progress }}%;"></div>
                             </div>
                             <div class="auction-retail">
-                                <span class="retail-price">Retail Price: ${{ number_format($similarAuction->retailPrice, 2) }}</span>
+                                <span class="retail-price">Retail Price: AED {{ number_format($similarAuction->retailPrice, 2) }}</span>
                                 @php
                                     $savings = 0;
                                     if ($similarAuction->retailPrice > 0 && $similarAuction->currentPrice > 0) {
@@ -1028,7 +1028,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Check if user is authenticated
             @auth
                 // Show confirmation modal
-                if (confirm('Are you sure you want to place a bid of ${{ number_format($auction->currentPrice + $auction->bidIncrement, 2) }}? This will cost you 1 bid credit.')) {
+                if (confirm('Are you sure you want to place a bid of AED {{ number_format($auction->currentPrice + $auction->bidIncrement, 2) }}? This will cost you 1 bid credit.')) {
                     // Set loading state on button
                     bidButton.disabled = true;
                     bidButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';

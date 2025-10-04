@@ -1003,6 +1003,14 @@
                 </a>
             </div>
 
+            <!-- Nav Item - Bid Packages -->
+            <div class="nav-item">
+                <a class="nav-link {{ request()->is('admin/bid-packages*') ? 'active' : '' }}" href="{{ route('admin.bid-packages.index') }}">
+                    <i class="fas fa-box"></i>
+                    <span>Bid Packages</span>
+                </a>
+            </div>
+
             <!-- Nav Item - Orders -->
             <div class="nav-item">
                 <a class="nav-link {{ request()->is('admin/orders*') ? 'active' : '' }}" href="{{ url('/admin/orders') }}">

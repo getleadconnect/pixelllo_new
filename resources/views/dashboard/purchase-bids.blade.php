@@ -27,10 +27,7 @@
                                     <span class="label">Bid Credits:</span>
                                     <span class="value">{{ $package->bidAmount }}</span>
                                 </div>
-                                <div class="detail-row">
-                                    <span class="label">Price per bid:</span>
-                                    <span class="value">${{ number_format($pricePerBid, 2) }}</span>
-                                </div>
+                                
                                 @if($package->description)
                                 <div class="package-desc">
                                     {{ $package->description }}
@@ -43,17 +40,17 @@
                     <div class="price-breakdown">
                         <div class="price-row">
                             <span>Subtotal</span>
-                            <span>${{ number_format($subtotal, 2) }}</span>
+                            <span>AED {{ number_format($subtotal, 2) }}</span>
                         </div>
                         @if($tax > 0)
                         <div class="price-row">
                             <span>Tax</span>
-                            <span>${{ number_format($tax, 2) }}</span>
+                            <span>AED {{ number_format($tax, 2) }}</span>
                         </div>
                         @endif
                         <div class="price-row total">
                             <span>Total</span>
-                            <span>${{ number_format($total, 2) }}</span>
+                            <span>AED {{ number_format($total, 2) }}</span>
                         </div>
                     </div>
 
@@ -123,7 +120,7 @@
 
                         <div class="action-buttons">
                             <button type="submit" class="btn btn-primary btn-large">
-                                <i class="fas fa-lock"></i> Proceed to Stripe Checkout (${{ number_format($total, 2) }})
+                                <i class="fas fa-lock"></i> Proceed to Stripe Checkout (AED {{ number_format($total, 2) }})
                             </button>
                             <a href="{{ route('dashboard.buy-bids') }}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left"></i> Back to Packages

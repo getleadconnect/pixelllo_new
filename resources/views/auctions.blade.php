@@ -528,7 +528,7 @@
                     <div class="auction-category">{{ $auction->category->name }}</div>
                     <h3 class="auction-title"><a href="{{ route('auction.detail', $auction->id) }}">{{ $auction->title }}</a></h3>
                     <div class="auction-info">
-                        <span class="auction-price">{{ $isClosed ? 'Final Price:' : 'Current Bid:' }} ${{ number_format($auction->currentPrice, 2) }}</span>
+                        <span class="auction-price">{{ $isClosed ? 'Final Price:' : 'Current Bid:' }} AED {{ number_format($auction->currentPrice, 2) }}</span>
                         <span class="auction-time {{ $urgentTime ? 'urgent' : '' }}">
                             <i class="fas fa-clock"></i> {{ $isClosed ? 'Ended' : $timeLeft }}
                         </span>
@@ -545,7 +545,7 @@
                         <div class="progress-bar" style="width: {{ $isClosed ? '100' : $progress }}%;"></div>
                     </div>
                     <div class="auction-retail">
-                        <span class="retail-price">Retail Price: ${{ number_format($auction->retailPrice, 2) }}</span>
+                        <span class="retail-price">Retail Price: AED {{ number_format($auction->retailPrice, 2) }}</span>
                         <span class="savings">{{ $isClosed ? 'Saved' : 'You Save' }}: {{ number_format($savings, 0) }}%</span>
                     </div>
                     <a href="{{ route('auction.detail', $auction->id) }}"

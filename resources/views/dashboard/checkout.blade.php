@@ -29,19 +29,19 @@
                         <div class="price-breakdown">
                             <div class="price-row">
                                 <span>Winning Bid:</span>
-                                <span>${{ number_format($subtotal, 2) }}</span>
+                                <span>AED {{ number_format($subtotal, 2) }}</span>
                             </div>
                             <div class="price-row">
                                 <span>Shipping:</span>
-                                <span>${{ number_format($shippingCost, 2) }}</span>
+                                <span>AED {{ number_format($shippingCost, 2) }}</span>
                             </div>
                             <div class="price-row">
                                 <span>Tax (8%):</span>
-                                <span>${{ number_format($tax, 2) }}</span>
+                                <span>AED {{ number_format($tax, 2) }}</span>
                             </div>
                             <div class="price-row total">
                                 <span>Total:</span>
-                                <span>${{ number_format($total, 2) }}</span>
+                                <span>AED {{ number_format($total, 2) }}</span>
                             </div>
                         </div>
                     </div>
@@ -146,7 +146,7 @@
                 <div class="checkout-actions">
                     <a href="{{ route('dashboard.wins') }}" class="btn btn-outline">Cancel</a>
                     <button type="submit" class="btn btn-primary btn-large">
-                        <i class="fas fa-lock"></i> Complete Purchase - ${{ number_format($total, 2) }}
+                        <i class="fas fa-lock"></i> Complete Purchase - AED {{ number_format($total, 2) }}
                     </button>
                 </div>
 

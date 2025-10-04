@@ -34,7 +34,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                 Total Revenue</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ number_format($totalRevenue, 2) }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">AED {{ number_format($totalRevenue, 2) }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
@@ -189,7 +189,7 @@
                                             <span class="badge badge-secondary">Ended</span>
                                         @endif
                                     </td>
-                                    <td>${{ number_format($auction->currentPrice, 2) }}</td>
+                                    <td>AED {{ number_format($auction->currentPrice, 2) }}</td>
                                     <td>{{ $auction->bids_count }}</td>
                                     <td>{{ $auction->endTime->format('M j, Y g:i A') }}</td>
                                     <td>

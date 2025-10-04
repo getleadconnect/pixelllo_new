@@ -992,7 +992,7 @@
                             $totalSavings = App\Models\Auction::where('status', 'ended')
                                 ->whereNotNull('winner_id')->sum(DB::raw('retailPrice - currentPrice'));
                         @endphp
-                        <span class="stat-number">${{ number_format($totalSavings)."0000" }}+</span>
+                        <span class="stat-number">AED {{ number_format($totalSavings)."0000" }}+</span>
                         <span class="stat-label">Customer Savings</span>
                     </div>
                 </div>
@@ -1021,7 +1021,7 @@
                             $totalSavings = App\Models\Auction::where('status', 'ended')
                                 ->whereNotNull('winner_id')->sum(DB::raw('retailPrice - currentPrice'));
                     @endphp
-                    <span class="stat-number">${{ number_format($totalSavings) }}+</span>
+                    <span class="stat-number">AED {{ number_format($totalSavings) }}+</span>
                     <span class="stat-label">Customer Savings</span>
                 </div>
             </div>
@@ -1130,7 +1130,7 @@
                                     <a href="{{ route('auction.detail', $auction->id) }}">{{ $auction->title }}</a>
                                 </h3>
                                 <div class="auction-info">
-                                    <span class="auction-price">Current Bid: ${{ number_format($auction->currentPrice, 2) }}</span>
+                                    <span class="auction-price">Current Bid: AED {{ number_format($auction->currentPrice, 2) }}</span>
                                     <span class="auction-time {{ $urgentTime ? 'urgent' : '' }}">
                                         <i class="fas fa-clock"></i> {{ $timeLeft }}
                                     </span>
@@ -1147,7 +1147,7 @@
                                     <div class="progress-bar" style="width: {{ $timeProgress }}%;"></div>
                                 </div>
                                 <div class="auction-retail">
-                                    <span class="retail-price">Retail Price: ${{ number_format($auction->retailPrice, 2) }}</span>
+                                    <span class="retail-price">Retail Price: AED {{ number_format($auction->retailPrice, 2) }}</span>
                                     <span class="savings">You Save: {{ number_format($savings, 0) }}%</span>
                                 </div>
                                 <a href="{{ route('auction.detail', $auction->id) }}" class="btn btn-primary" style="width: 100%;">Bid Now</a>
@@ -1199,7 +1199,7 @@
                                 <div class="auction-category">{{ $auction->category->name }}</div>
                                 <h3 class="auction-title"><a href="{{ route('auction.detail', $auction->id) }}">{{ $auction->title }}</a></h3>
                                 <div class="auction-info">
-                                    <span class="auction-price">Starting Bid: ${{ number_format($auction->startingPrice, 2) }}</span>
+                                    <span class="auction-price">Starting Bid: AED {{ number_format($auction->startingPrice, 2) }}</span>
                                     <span class="auction-time">
                                         <i class="fas fa-calendar"></i> {{ $startTimeMessage }}
                                     </span>
@@ -1216,7 +1216,7 @@
                                     <div class="progress-bar" style="width: 0%;"></div>
                                 </div>
                                 <div class="auction-retail">
-                                    <span class="retail-price">Retail Price: ${{ number_format($auction->retailPrice, 2) }}</span>
+                                    <span class="retail-price">Retail Price: AED {{ number_format($auction->retailPrice, 2) }}</span>
                                     <span class="notify-btn">Get Notified</span>
                                 </div>
                                 <a href="{{ route('auction.detail', $auction->id) }}" class="btn btn-outline" style="width: 100%;">View Details</a>
@@ -1267,7 +1267,7 @@
                                 <div class="auction-category">{{ $auction->category->name }}</div>
                                 <h3 class="auction-title"><a href="{{ route('auction.detail', $auction->id) }}">{{ $auction->title }}</a></h3>
                                 <div class="auction-info">
-                                    <span class="auction-price">Final Price: ${{ number_format($auction->currentPrice, 2) }}</span>
+                                    <span class="auction-price">Final Price: AED {{ number_format($auction->currentPrice, 2) }}</span>
                                     <span class="auction-time">
                                         <i class="fas fa-clock"></i> Ended
                                     </span>
@@ -1284,7 +1284,7 @@
                                     <div class="progress-bar" style="width: 100%;"></div>
                                 </div>
                                 <div class="auction-retail">
-                                    <span class="retail-price">Retail Price: ${{ number_format($auction->retailPrice, 2) }}</span>
+                                    <span class="retail-price">Retail Price: AED {{ number_format($auction->retailPrice, 2) }}</span>
                                     <span class="savings">Saved: {{ number_format($savings, 0) }}%</span>
                                 </div>
                                 <a href="{{ route('auction.detail', $auction->id) }}" class="btn btn-outline" style="width: 100%;">View Details</a>
@@ -1365,10 +1365,10 @@
                         <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 10px; color: #333;">{{ $winner->title }}</h4>
                         <p style="color: #666; font-size: 14px; margin-bottom: 15px;">{{ $winner->category->name ?? 'Uncategorized' }}</p>
                         <div class="winner-details" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <span style="color: #999; font-size: 13px;">Retail: <del>${{ number_format($winner->retailPrice, 2) }}</del></span>
+                            <span style="color: #999; font-size: 13px;">Retail: <del>AED {{ number_format($winner->retailPrice, 2) }}</del></span>
                             <span style="color: #28a745; font-weight: 600; font-size: 14px;">{{ number_format($savings, 0) }}% OFF</span>
                         </div>
-                        <div class="winner-price" style="font-size: 18px; font-weight: 700; color: #ff5500; margin-bottom: 10px;">Won for ${{ number_format($winner->currentPrice, 2) }}</div>
+                        <div class="winner-price" style="font-size: 18px; font-weight: 700; color: #ff5500; margin-bottom: 10px;">Won for AED {{ number_format($winner->currentPrice, 2) }}</div>
                         <div class="winner-info" style="display: flex; justify-content: space-between; font-size: 12px; color: #999;">
                             <span>{{ $winner->winner->name ?? 'Anonymous' }}</span>
                             <span>{{ $winner->endTime->diffForHumans() }}</span>

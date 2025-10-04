@@ -460,9 +460,9 @@
                         <h3 class="order-product-title">{{ $order->auction->title ?? 'Product Name' }}</h3>
                         <div class="order-product-info">
                             <div class="order-product-price">
-                                <span>Winning Bid: <strong>${{ number_format($order->subtotal ?? $order->auction->currentPrice ?? 0, 2) }}</strong></span>
-                                <span>+ Shipping: <strong>${{ number_format($order->shipping_cost ?? 0, 2) }}</strong></span>
-                                <span>Total: <strong>${{ number_format($order->total ?? $order->amount ?? 0, 2) }}</strong></span>
+                                <span>Winning Bid: <strong>AED {{ number_format($order->subtotal ?? $order->auction->currentPrice ?? 0, 2) }}</strong></span>
+                                <span>+ Shipping: <strong>AED {{ number_format($order->shipping_cost ?? 0, 2) }}</strong></span>
+                                <span>Total: <strong>AED {{ number_format($order->total ?? $order->amount ?? 0, 2) }}</strong></span>
                             </div>
                             @if($order->status === 'delivered' || $order->status === 'shipped')
                             <div class="order-delivery-info">

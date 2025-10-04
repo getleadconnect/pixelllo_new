@@ -85,7 +85,7 @@
                             <span>Auction Not Found</span>
                         @endif
                     </td>
-                    <td>${{ number_format($bid->amount, 2) }}</td>
+                    <td>AED {{ number_format($bid->amount, 2) }}</td>
                     <td>1 bid</td>
                     <td style="color: {{ $status == 'won' ? '#10b981' : ($status == 'active' ? '#3b82f6' : ($status == 'outbid' ? '#f59e0b' : ($status == 'lost' ? '#ef4444' : '#6b7280'))) }}; font-weight: 500;">{{ $statusText }}</td>
                 </tr>

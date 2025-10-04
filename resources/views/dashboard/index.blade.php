@@ -28,7 +28,7 @@
         <div class="stat-card">
             <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
             <div class="stat-info">
-                <h3>${{ number_format($savings, 2) }}</h3>
+                <h3>AED {{ number_format($savings, 2) }}</h3>
                 <p>Total Savings</p>
             </div>
         </div>

@@ -124,7 +124,7 @@ use App\Models\User;
                         @forelse ($topSpenders ?? [] as $user)
                             <tr>
                                 <td>{{ $user->name }}</td>
-                                <td>${{ number_format($user->orders_sum_total, 2) }}</td>
+                                <td>AED {{ number_format($user->orders_sum_total, 2) }}</td>
                                 <td>
                                     <a href="{{ url('/admin/users/' . $user->id) }}" class="btn btn-sm btn-primary">
                                         <i class="fas fa-eye"></i> View

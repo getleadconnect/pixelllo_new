@@ -357,7 +357,7 @@
                                 {{ $auction->status == 'ended' ? 'Closed' : ucfirst($auction->status) }}
                             </span>
                         </td>
-                        <td>${{ number_format($auction->currentPrice, 2) }}</td>
+                        <td>AED {{ number_format($auction->currentPrice, 2) }}</td>
                         <td>{{ $auction->startTime->format('M d, Y H:i') }}</td>
                         <td>{{ $auction->endTime->format('M d, Y H:i') }}</td>
                         <td>

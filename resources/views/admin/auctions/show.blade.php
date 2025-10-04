@@ -150,11 +150,11 @@
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 30px;">
                     <div style="background-color: rgba(255, 153, 0, 0.1); padding: 15px; border-radius: 8px;">
                         <h5 style="margin-bottom: 5px; color: #ff9900;">Current Price</h5>
-                        <p style="font-size: 1.5rem; font-weight: 700; margin: 0;">${{ number_format($auction->currentPrice, 2) }}</p>
+                        <p style="font-size: 1.5rem; font-weight: 700; margin: 0;">AED {{ number_format($auction->currentPrice, 2) }}</p>
                     </div>
                     <div style="background-color: rgba(23, 162, 184, 0.1); padding: 15px; border-radius: 8px;">
                         <h5 style="margin-bottom: 5px; color: #17a2b8;">Retail Price</h5>
-                        <p style="font-size: 1.5rem; font-weight: 700; margin: 0;">${{ number_format($auction->retailPrice, 2) }}</p>
+                        <p style="font-size: 1.5rem; font-weight: 700; margin: 0;">AED {{ number_format($auction->retailPrice, 2) }}</p>
                     </div>
                     <div style="background-color: rgba(40, 167, 69, 0.1); padding: 15px; border-radius: 8px;">
                         <h5 style="margin-bottom: 5px; color: #28a745;">Start Time</h5>
@@ -172,8 +172,8 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                         <div>
                             <p><strong>Category:</strong> {{ $auction->category->name ?? 'Uncategorized' }}</p>
-                            <p><strong>Starting Price:</strong> ${{ number_format($auction->startingPrice, 2) }}</p>
-                            <p><strong>Bid Increment:</strong> ${{ number_format($auction->bidIncrement, 2) }}</p>
+                            <p><strong>Starting Price:</strong> AED {{ number_format($auction->startingPrice, 2) }}</p>
+                            <p><strong>Bid Increment:</strong> AED {{ number_format($auction->bidIncrement, 2) }}</p>
                         </div>
                         <div>
                             <p><strong>Extension Time:</strong> {{ $auction->extensionTime }} seconds</p>
@@ -227,7 +227,7 @@
                                                 <span class="text-muted">Deleted User</span>
                                             @endif
                                         </td>
-                                        <td>${{ number_format($bid->amount, 2) }}</td>
+                                        <td>AED {{ number_format($bid->amount, 2) }}</td>
                                         <td>{{ $bid->created_at->format('M d, Y H:i:s') }}</td>
                                     </tr>
                                 @endforeach

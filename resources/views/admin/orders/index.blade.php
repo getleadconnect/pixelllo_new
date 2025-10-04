@@ -161,7 +161,7 @@
                             </a>
                         </td>
                         <td>{{ $order->created_at->format('M d, Y H:i') }}</td>
-                        <td>${{ number_format($order->total, 2) }}</td>
+                        <td>AED {{ number_format($order->total, 2) }}</td>
                         <td>
                             <span class="status-badge 
                                 {{ $order->status == 'delivered' ? 'active' : 

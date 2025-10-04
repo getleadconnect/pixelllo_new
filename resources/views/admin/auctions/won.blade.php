@@ -277,16 +277,16 @@
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Auction Price</span>
-                            <span class="detail-value">${{ number_format($order->auction_price ?? 0, 2) }}</span>
+                            <span class="detail-value">AED {{ number_format($order->auction_price ?? 0, 2) }}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Shipping</span>
-                            <span class="detail-value">${{ number_format($order->shipping_cost ?? 0, 2) }}</span>
+                            <span class="detail-value">AED {{ number_format($order->shipping_cost ?? 0, 2) }}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Total Amount</span>
                             <span class="detail-value" style="color: #059669; font-weight: 600;">
-                                ${{ number_format($order->total, 2) }}
+                                AED {{ number_format($order->total, 2) }}
                             </span>
                         </div>
                         <div class="detail-item">
@@ -421,7 +421,7 @@
                             </div>
                             <div class="detail-item">
                                 <span class="detail-label">Final Price</span>
-                                <span class="detail-value">${{ number_format($auction->currentPrice, 2) }}</span>
+                                <span class="detail-value">AED {{ number_format($auction->currentPrice, 2) }}</span>
                             </div>
                             <div class="detail-item">
                                 <span class="detail-label">Won Date</span>

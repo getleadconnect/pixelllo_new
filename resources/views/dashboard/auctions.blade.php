@@ -141,8 +141,8 @@
                         <div class="auction-item-info">
                             <div class="auction-progress-container">
                                 <div class="progress-stats">
-                                    <span>Current Bid: <strong>${{ number_format($auction->currentPrice, 2) }}</strong></span>
-                                    <span>Retail: <strong>${{ number_format($auction->retailPrice, 2) }}</strong></span>
+                                    <span>Current Bid: <strong>AED {{ number_format($auction->currentPrice, 2) }}</strong></span>
+                                    <span>Retail: <strong>AED {{ number_format($auction->retailPrice, 2) }}</strong></span>
                                 </div>
                                 <div class="auction-progress">
                                     <div class="progress-bar" style="width: {{ $progress }}%;"></div>
@@ -238,7 +238,7 @@
                                 </div>
                                 <div class="win-detail">
                                     <span>Retail Price:</span>
-                                    <strong>${{ number_format($auction->retailPrice, 2) }}</strong>
+                                    <strong>AED {{ number_format($auction->retailPrice, 2) }}</strong>
                                 </div>
                                 <div class="win-detail">
                                     <span>You Saved:</span>
@@ -323,11 +323,11 @@
                             <div class="win-info">
                                 <div class="win-detail">
                                     <span>Final Price:</span>
-                                    <strong>${{ number_format($auction->currentPrice, 2) }}</strong>
+                                    <strong>AED {{ number_format($auction->currentPrice, 2) }}</strong>
                                 </div>
                                 <div class="win-detail">
                                     <span>Retail Price:</span>
-                                    <strong>${{ number_format($auction->retailPrice, 2) }}</strong>
+                                    <strong>AED {{ number_format($auction->retailPrice, 2) }}</strong>
                                 </div>
                                 <div class="win-detail">
                                     <span>Your Bids:</span>

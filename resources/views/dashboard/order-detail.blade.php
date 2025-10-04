@@ -294,11 +294,11 @@
                         <div style="display: flex; gap: 20px;">
                             <div>
                                 <span style="color: #6b7280; font-size: 0.85rem;">Retail Price</span>
-                                <p style="font-weight: 600; margin: 0;">${{ number_format($order->auction->retailPrice, 2) }}</p>
+                                <p style="font-weight: 600; margin: 0;">AED {{ number_format($order->auction->retailPrice, 2) }}</p>
                             </div>
                             <div>
                                 <span style="color: #6b7280; font-size: 0.85rem;">Won At</span>
-                                <p style="font-weight: 600; margin: 0; color: #10b981;">${{ number_format($order->auction->currentPrice, 2) }}</p>
+                                <p style="font-weight: 600; margin: 0; color: #10b981;">AED {{ number_format($order->auction->currentPrice, 2) }}</p>
                             </div>
                             <div>
                                 <span style="color: #6b7280; font-size: 0.85rem;">You Saved</span>
@@ -331,19 +331,19 @@
                     <div class="price-breakdown">
                         <div class="price-row">
                             <span class="detail-label">Winning Bid</span>
-                            <span class="detail-value">${{ number_format($order->subtotal, 2) }}</span>
+                            <span class="detail-value">AED {{ number_format($order->subtotal, 2) }}</span>
                         </div>
                         <div class="price-row">
                             <span class="detail-label">Shipping Cost</span>
-                            <span class="detail-value">${{ number_format($order->shipping_cost, 2) }}</span>
+                            <span class="detail-value">AED {{ number_format($order->shipping_cost, 2) }}</span>
                         </div>
                         <div class="price-row">
                             <span class="detail-label">Tax</span>
-                            <span class="detail-value">${{ number_format($order->tax, 2) }}</span>
+                            <span class="detail-value">AED {{ number_format($order->tax, 2) }}</span>
                         </div>
                         <div class="price-row total">
                             <span>Total Amount</span>
-                            <span>${{ number_format($order->total, 2) }}</span>
+                            <span>AED {{ number_format($order->total, 2) }}</span>
                         </div>
                     </div>
 
@@ -366,7 +366,7 @@
                         <p><strong>Transaction ID:</strong> {{ $order->transaction_id }}</p>
                         <p><strong>Payment Method:</strong> {{ ucfirst($order->paymentMethod) }}</p>
                         <p><strong>Payment Date:</strong> {{ $order->payment_details['payment_date'] ?? $order->updated_at->format('F d, Y \a\t g:i A') }}</p>
-                        <p><strong>Amount Paid:</strong> ${{ number_format($order->total, 2) }}</p>
+                        <p><strong>Amount Paid:</strong> AED {{ number_format($order->total, 2) }}</p>
                     </div>
 
                     <div class="action-buttons">

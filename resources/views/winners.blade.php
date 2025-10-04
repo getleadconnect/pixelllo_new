@@ -334,7 +334,7 @@ use Illuminate\Support\Str;
                 <div class="stat-label">Happy Winners</div>
             </div>
             <div class="stat-item">
-                <div class="stat-number">${{ number_format($totalSavings ?? 0, 0) }}+</div>
+                <div class="stat-number">AED {{ number_format($totalSavings ?? 0, 0) }}+</div>
                 <div class="stat-label">Saved by Our Customers</div>
             </div>
             <div class="stat-item">
@@ -405,11 +405,11 @@ use Illuminate\Support\Str;
                     <div class="winner-details">
                         <div class="detail-item">
                             <span class="detail-label">Final Price:</span>
-                            <span class="detail-value">${{ number_format($winner->currentPrice, 2) }}</span>
+                            <span class="detail-value">AED {{ number_format($winner->currentPrice, 2) }}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Retail Price:</span>
-                            <span class="detail-value">${{ number_format($winner->retailPrice, 2) }}</span>
+                            <span class="detail-value">AED {{ number_format($winner->retailPrice, 2) }}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Savings:</span>

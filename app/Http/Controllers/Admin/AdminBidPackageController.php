@@ -13,8 +13,16 @@ class AdminBidPackageController extends Controller
      */
     public function index()
     {
-        $bidPackages = BidPackage::orderBy('bidAmount', 'asc')->get();
-        return response()->json($bidPackages);
+        $packages = BidPackage::orderBy('bidAmount', 'asc')->get();
+        return view('admin.bid-packages.index', compact('packages'));
+    }
+
+    /**
+     * Show the form for creating a new bid package.
+     */
+    public function create()
+    {
+        return view('admin.bid-packages.create');
     }
 
     /**
@@ -30,24 +38,25 @@ class AdminBidPackageController extends Controller
             'isActive' => 'boolean'
         ]);
 
-        $bidPackage = BidPackage::create([
+        BidPackage::create([
             'name' => $request->name,
             'bidAmount' => $request->bidAmount,
             'price' => $request->price,
             'description' => $request->description,
-            'isActive' => $request->isActive ?? true
+            'isActive' => $request->has('isActive') ? true : false
         ]);
 
-        return response()->json($bidPackage, 201);
+        return redirect()->route('admin.bid-packages.index')
+            ->with('success', 'Bid package created successfully.');
     }
 
     /**
-     * Display the specified resource.
+     * Show the form for editing the specified bid package.
      */
-    public function show(string $id)
+    public function edit(string $id)
     {
-        $bidPackage = BidPackage::findOrFail($id);
-        return response()->json($bidPackage);
+        $package = BidPackage::findOrFail($id);
+        return view('admin.bid-packages.edit', compact('package'));
     }
 
     /**
@@ -65,9 +74,16 @@ class AdminBidPackageController extends Controller
             'isActive' => 'sometimes|boolean'
         ]);
 
-        $bidPackage->update($request->all());
+        $bidPackage->update([
+            'name' => $request->name,
+            'bidAmount' => $request->bidAmount,
+            'price' => $request->price,
+            'description' => $request->description,
+            'isActive' => $request->has('isActive') ? true : false
+        ]);
 
-        return response()->json($bidPackage);
+        return redirect()->route('admin.bid-packages.index')
+            ->with('success', 'Bid package updated successfully.');
     }
 
     /**
@@ -76,12 +92,9 @@ class AdminBidPackageController extends Controller
     public function destroy(string $id)
     {
         $bidPackage = BidPackage::findOrFail($id);
+        $bidPackage->delete();
 
-        // Instead of deleting, we often just deactivate bid packages
-        // to maintain history for users who purchased them
-        $bidPackage->isActive = false;
-        $bidPackage->save();
-
-        return response()->json(['message' => 'Bid package deactivated successfully']);
+        return redirect()->route('admin.bid-packages.index')
+            ->with('success', 'Bid package deleted successfully.');
     }
 }

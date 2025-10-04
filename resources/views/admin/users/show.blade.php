@@ -477,7 +477,7 @@
                                     <td>
                                         <a href="{{ url('/admin/auctions/' . $bid->auction->id) }}">{{ Str::limit($bid->auction->title, 50) }}</a>
                                     </td>
-                                    <td>${{ number_format($bid->amount, 2) }}</td>
+                                    <td>AED {{ number_format($bid->amount, 2) }}</td>
                                     <td style="white-space: nowrap;">{{ $bid->created_at->format('M d, Y H:i') }}</td>
                                     <td>
                                         @php
@@ -576,8 +576,8 @@
                                     <td>
                                         <a href="{{ url('/admin/auctions/' . $auction->id) }}">{{ Str::limit($auction->title, 45) }}</a>
                                     </td>
-                                    <td>${{ number_format($auction->currentPrice, 2) }}</td>
-                                    <td>${{ number_format($auction->retailPrice, 2) }}</td>
+                                    <td>AED {{ number_format($auction->currentPrice, 2) }}</td>
+                                    <td>AED {{ number_format($auction->retailPrice, 2) }}</td>
                                     <td>
                                         @php
                                             $savings = $auction->retailPrice > 0 ?
@@ -674,7 +674,7 @@
                                     <td>
                                         <a href="{{ url('/admin/auctions/' . $order->auction_id) }}">{{ Str::limit($order->auction->title ?? 'Unknown', 45) }}</a>
                                     </td>
-                                    <td>${{ number_format($order->total, 2) }}</td>
+                                    <td>AED {{ number_format($order->total, 2) }}</td>
                                     <td>
                                         <span class="status-badge {{ $order->status == 'delivered' ? 'active' : ($order->status == 'processing' ? 'processing' : ($order->status == 'shipped' ? 'shipped' : 'pending')) }}">
                                             {{ ucfirst($order->status) }}
@@ -869,7 +869,7 @@
                 </div>
                 <div class="stat-box">
                     <h4>Total Spent</h4>
-                    <p>${{ number_format($totalSpent ?? 0, 2) }}</p>
+                    <p>AED {{ number_format($totalSpent ?? 0, 2) }}</p>
                 </div>
                 <div class="stat-box">
                     <h4>Won Auctions</h4>

@@ -39,7 +39,7 @@
                         <div class="win-info-grid">
                             <div class="win-info-item">
                                 <span class="win-info-label">Final Price</span>
-                                <span class="win-info-value">${{ number_format($auction->currentPrice, 2) }}</span>
+                                <span class="win-info-value">AED {{ number_format($auction->currentPrice, 2) }}</span>
                             </div>
                             <div class="win-info-item">
                                 <span class="win-info-label">Bids Used</span>
@@ -47,7 +47,7 @@
                             </div>
                             <div class="win-info-item">
                                 <span class="win-info-label">Retail Price</span>
-                                <span class="win-info-value">${{ number_format($auction->retailPrice, 2) }}</span>
+                                <span class="win-info-value">AED {{ number_format($auction->retailPrice, 2) }}</span>
                             </div>
                             <div class="win-info-item">
                                 <span class="win-info-label">You Saved</span>
@@ -183,7 +183,7 @@
                         <div class="win-info-grid">
                             <div class="win-info-item">
                                 <span class="win-info-label">Final Price</span>
-                                <span class="win-info-value">${{ number_format($auction->currentPrice, 2) }}</span>
+                                <span class="win-info-value">AED {{ number_format($auction->currentPrice, 2) }}</span>
                             </div>
                             <div class="win-info-item">
                                 <span class="win-info-label">Bids Used</span>
@@ -191,7 +191,7 @@
                             </div>
                             <div class="win-info-item">
                                 <span class="win-info-label">Retail Price</span>
-                                <span class="win-info-value">${{ number_format($auction->retailPrice, 2) }}</span>
+                                <span class="win-info-value">AED {{ number_format($auction->retailPrice, 2) }}</span>
                             </div>
                             <div class="win-info-item">
                                 <span class="win-info-label">You Saved</span>

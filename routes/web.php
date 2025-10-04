@@ -137,6 +137,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::delete('/categories/{id}', [App\Http\Controllers\Admin\AdminCategoryController::class, 'destroy'])->name('admin.categories.destroy');
     Route::put('/categories/{id}/reassign-auctions', [App\Http\Controllers\Admin\AdminCategoryController::class, 'reassignAuctions'])->name('admin.categories.reassign-auctions');
 
+    // Bid Packages Management
+    Route::get('/bid-packages', [App\Http\Controllers\Admin\AdminBidPackageController::class, 'index'])->name('admin.bid-packages.index');
+    Route::get('/bid-packages/create', [App\Http\Controllers\Admin\AdminBidPackageController::class, 'create'])->name('admin.bid-packages.create');
+    Route::post('/bid-packages', [App\Http\Controllers\Admin\AdminBidPackageController::class, 'store'])->name('admin.bid-packages.store');
+    Route::get('/bid-packages/{id}/edit', [App\Http\Controllers\Admin\AdminBidPackageController::class, 'edit'])->name('admin.bid-packages.edit');
+    Route::put('/bid-packages/{id}', [App\Http\Controllers\Admin\AdminBidPackageController::class, 'update'])->name('admin.bid-packages.update');
+    Route::delete('/bid-packages/{id}', [App\Http\Controllers\Admin\AdminBidPackageController::class, 'destroy'])->name('admin.bid-packages.destroy');
+
     // Marketing Management
     Route::get('/marketing', [App\Http\Controllers\Admin\AdminMarketingController::class, 'index'])->name('admin.marketing');
     Route::get('/marketing/slider', [App\Http\Controllers\Admin\AdminMarketingController::class, 'slider'])->name('admin.marketing.slider');
