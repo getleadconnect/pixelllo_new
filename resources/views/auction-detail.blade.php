@@ -1024,6 +1024,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const endTime = new Date("{{ $auction->endTime->toIso8601String() }}").getTime();
             const startTime = new Date("{{ $auction->startTime->toIso8601String() }}").getTime();
             const totalDuration = endTime - startTime;
+            let auctionEndAlertShown = false; // Flag to prevent repeated alerts
 
             console.log('Countdown Timer Debug:');
             console.log('End Time:', new Date(endTime));
@@ -1046,9 +1047,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     countdownElement.classList.add('urgent');
                     progressBar.style.width = "100%";
 
-                    // Show alert dialog and reload page
-                    alert('This auction has ended!');
-                    window.location.reload();
+                    // Show alert dialog only once and reload page
+                    if (!auctionEndAlertShown) {
+                        auctionEndAlertShown = true;
+                        alert('This auction has ended!');
+                        window.location.reload();
+                    }
 
                     return;
                 }
