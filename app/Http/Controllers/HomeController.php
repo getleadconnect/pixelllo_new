@@ -553,7 +553,14 @@ class HomeController extends Controller
             $auction = Auction::findOrFail($request->auction_id);
 
             // Check if auction is active
-            if ($auction->status !== 'active') {
+            if ($auction->status == 'ended') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'This auction is ended.'
+                ], 422);
+            }
+
+            if ($auction->status == 'upcoming') {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'This auction is not active.'
