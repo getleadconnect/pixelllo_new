@@ -13,8 +13,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 8. **Troubleshooting** - Common issues and solutions
 9. **AI Assistant Configuration** - Workflow instructions for AI code agents
 
-## IMPORTANT: Server-Only Development
-**This project is deployed on a production server. All fixes and updates should be focused on server deployment only. Do not test or configure for local development environments.**
+## Development Environment
+**This project supports both local development (XAMPP/MySQL) and production deployment (Server/PostgreSQL).**
+- Local: XAMPP with MySQL database (`DB_CONNECTION=mysql`)
+- Production: Server with PostgreSQL (Supabase) database (`DB_CONNECTION=pgsql`)
+- Always check `.env` to understand which environment you're working in
 
 ## Recent Updates
 
@@ -54,11 +57,13 @@ Pixelllo is an online auction platform built with Laravel that allows users to b
 
 ### Backend
 - **Laravel 12.14.1** - PHP web application framework (latest version)
-- **PHP 8.2+** - Server-side programming language
-- **PostgreSQL** - Primary database (Supabase hosted)
+- **PHP 8.4+** - Server-side programming language (requires ^8.4)
+- **MySQL/PostgreSQL** - Database (supports both, check .env for current connection)
+  - Production: PostgreSQL (Supabase hosted) with Row Level Security (RLS)
+  - Development: MySQL (XAMPP local)
 - **Laravel Sanctum** - API authentication
 - **Eloquent ORM** - Database interactions
-- **Row Level Security (RLS)** - Enabled on all tables for API security
+- **Stripe** - Payment processing integration
 
 ### Frontend
 - **Blade Templates** - Laravel's templating engine
@@ -176,15 +181,17 @@ npm install                          # Install Node dependencies
 - Password reset functionality
 
 ### Database Configuration
-- Primary: PostgreSQL (Supabase hosted)
-- Default connection: `pgsql` (see `config/database.php:19`)
+- **Current Connection**: Check `.env` file for `DB_CONNECTION` value
+  - `mysql` - Local development (XAMPP)
+  - `pgsql` - Production (Supabase hosted)
+- Default fallback: `pgsql` (see `config/database.php:19`)
 - Testing: SQLite in-memory (see `phpunit.xml:25-26`)
 - Migrations in `database/migrations/`
 - Seeders in `database/seeders/`
-- **IPv6 Required**: Server must have IPv6 enabled for Supabase connection
-- **Row Level Security**: All tables have RLS enabled with permissive policies for database owner
+- **IPv6 Required**: Server must have IPv6 enabled for Supabase PostgreSQL connection
+- **Row Level Security**: PostgreSQL tables have RLS enabled with permissive policies for database owner
 
-**Note**: When writing database code, ensure compatibility with both PostgreSQL and SQLite. The `DatabaseService` class provides driver-agnostic methods. Be aware of SQLite limitations when writing tests (e.g., foreign key constraints, certain data types).
+**Note**: When writing database code, ensure compatibility with MySQL, PostgreSQL, and SQLite. The `DatabaseService` class provides driver-agnostic methods. Be aware of driver-specific limitations (e.g., SQLite foreign key constraints, PostgreSQL-specific types).
 
 ## Error Logging and Debugging
 
@@ -320,13 +327,28 @@ max_input_time = 120
 
 ### Helper Functions
 - `app/Helpers/helpers.php` - Global helper functions (autoloaded via composer.json)
+- `app/Helpers/mbstring_polyfill.php` - Multibyte string function polyfills
 - `app/Helpers/CurrencyHelper.php` - Currency formatting utilities
 - Helpers are autoloaded through composer.json's "files" section:
   ```json
   "autoload": {
-      "files": ["app/Helpers/helpers.php"]
+      "files": [
+          "app/Helpers/mbstring_polyfill.php",
+          "app/Helpers/helpers.php"
+      ]
   }
   ```
+
+### Payment Integration
+- **Stripe**: Configured for bid package purchases and auction payments
+  - API keys stored in `.env` (STRIPE_KEY, STRIPE_SECRET)
+  - Configuration: `config/stripe.php`
+  - Controller: `app/Http/Controllers/StripeController.php`
+
+### Currency Support
+- Multi-currency support via `config/currencies.php`
+- Currency selection and conversion functionality
+- Controller: `app/Http/Controllers/CurrencyController.php`
 
 ## Testing Structure
 
@@ -390,12 +412,14 @@ php artisan test --coverage
 - **Fix**: `php artisan storage:link` and set proper permissions
 
 ### Database Connection Issues
-- **Cause**: PostgreSQL connection problems
-- **Fix**: Check `.env` database credentials and PostgreSQL service status
-- **IPv6 Network Issues**: 
+- **Cause**: Database connection problems (MySQL or PostgreSQL)
+- **Fix**: Check `.env` database credentials and ensure database service is running
+  - Local (MySQL): Verify XAMPP MySQL service is running
+  - Production (PostgreSQL): Check Supabase connection and credentials
+- **IPv6 Network Issues** (PostgreSQL/Supabase only):
   - **Cause**: Supabase requires IPv6, server only has IPv4
   - **Fix**: Enable IPv6 on server (see IPv6 Configuration section below)
-- **RLS Policy Errors**:
+- **RLS Policy Errors** (PostgreSQL only):
   - **Cause**: Row Level Security blocking access
   - **Fix**: Ensure database user has proper permissions or policies
 

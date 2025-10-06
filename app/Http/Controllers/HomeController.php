@@ -24,7 +24,6 @@ class HomeController extends Controller
     {
         // Get featured auctions (ensure they're active and not ended)
         $featuredAuctions = Auction::where('status', 'active')
-            ->where('status', 'active')
             ->where('endTime', '>', now()) // Make sure they haven't ended yet
             ->with(['category', 'bids'])
             ->take(4)
@@ -32,15 +31,18 @@ class HomeController extends Controller
 
         // Removed endingSoonAuctions query as we no longer need this section
 
-        // Get upcoming auctions
+        // Get upcoming auctions (exclude auctions that have already ended)
         $upcomingAuctions = Auction::where('status', 'upcoming')
+            ->where('endTime', '>', now()) // Exclude auctions that have ended
+            ->where('startTime', '>', now()) // Only show auctions that haven't started yet
             ->with(['category'])
             ->orderBy('startTime', 'asc')
             ->take(6)
             ->get();
 
-        // Get recently added auctions
+        // Get recently added auctions (only active and not ended)
         $recentAuctions = Auction::where('status', 'active')
+            ->where('endTime', '>', now()) // Exclude auctions that have ended
             ->with(['category', 'bids'])
             ->orderBy('created_at', 'desc')
             ->take(8)
@@ -502,10 +504,11 @@ class HomeController extends Controller
             $savingsPercentage = 100 - (($auction->currentPrice / $auction->retailPrice) * 100);
         }
 
-        // Get similar auctions from the same category
+        // Get similar auctions from the same category (only active and not ended)
         $similarAuctions = Auction::where('category_id', $auction->category_id)
             ->where('id', '!=', $auction->id)
             ->where('status', 'active')
+            ->where('endTime', '>', now()) // Exclude auctions that have ended
             ->take(4)
             ->get();
 
@@ -520,6 +523,7 @@ class HomeController extends Controller
         ));
     }
 
+   
     /**
      * Place a bid on an auction.
      *
@@ -791,5 +795,55 @@ class HomeController extends Controller
         $parts[] = $secs . 's';
 
         return implode(' ', $parts);
+    }
+
+    /**
+     * Get recent bids for an auction (AJAX endpoint for DataTables)
+     *
+     * @param  string  $auctionId
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+    public function getRecentBids($auctionId)
+    {
+        try {
+            // Find the auction
+            $auction = Auction::findOrFail($auctionId);
+
+            // Get recent bids with user information
+            $bids = Bid::where('auction_id', $auctionId)
+                ->with('user')
+                ->orderByDesc('amount')
+                ->limit(50) // Limit to last 50 bids
+                ->get()
+                ->map(function($bid, $index) {
+                    // Mask bidder name like in original format: J*****n
+                    $maskedName = 'Anonymous';
+                    if ($bid->user && $bid->user->name) {
+                        $name = $bid->user->name;
+                        $maskedName = substr($name, 0, 1) . '*****' . substr($name, -1);
+                    }
+
+                    return [
+                            'index' => $index + 1,
+                            'bidder' => $maskedName,
+                            'amount' => 'AED ' . number_format($bid->amount, 2),
+                            'raw_amount' => $bid->amount, // Add raw amount for sorting
+                            'time_ago' => $bid->created_at->diffForHumans(),
+                        ];
+                    });
+
+            return response()->json([
+                'success' => true,
+                'data' => $bids,
+                'total' => $bids->count()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch bids',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

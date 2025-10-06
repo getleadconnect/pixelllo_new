@@ -29,6 +29,9 @@ Route::get('/sitemap', [HomeController::class, 'sitemap'])->name('sitemap');
 Route::post('/bid-now', [HomeController::class, 'placeBid'])->middleware('auth')->name('bid.now');
 Route::post('/auto-bid', [HomeController::class, 'autoBid'])->middleware('auth')->name('auto.bid');
 
+// AJAX API route for recent bids
+Route::get('/api/auctions/{auctionId}/recent-bids', [HomeController::class, 'getRecentBids'])->name('api.auction.recent-bids');
+
 // Authentication routes
 Route::get('/login', function () {
     return view('auth.login');

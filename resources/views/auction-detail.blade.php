@@ -126,6 +126,48 @@
     line-height: 1.6;
 }
 
+/* Show More/Show Less button - Mobile only */
+.show-more-btn {
+    display: none;
+    margin-top: 10px;
+    padding: 8px 20px;
+    background-color: #ff5500;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 0.3s;
+}
+
+.show-more-btn:hover {
+    background-color: #ff6600;
+}
+
+/* Mobile view - Limit description height */
+@media (max-width: 768px) {
+    .description-content.collapsed {
+        max-height: 100px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .description-content.collapsed::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 40px;
+        background: linear-gradient(to bottom, transparent, white);
+    }
+
+    .show-more-btn {
+        display: inline-block !important;
+    }
+}
+
 .specs-content ul {
     list-style: none;
     padding: 0;
@@ -627,9 +669,10 @@
 
                 <div class="auction-description">
                     <h3>Product Description</h3>
-                    <div class="description-content">
+                    <div class="description-content" id="product-description">
                         {!! nl2br(e($auction->description)) !!}
                     </div>
+                    <button id="toggle-description-btn" class="show-more-btn" style="display: none;">Show More</button>
                 </div>
 
                 <div class="auction-details-specs">
@@ -744,29 +787,22 @@
                 </div>
                 
                 <div class="recent-bids">
-                    <h3>Recent Bids</h3>
-                    
-                    @if($recentBidders->count() > 0)
-                        <ul class="bid-list">
-                            @foreach($recentBidders as $bid)
-                                <li class="bid-item">
-                                    <div class="bidder-info">
-                                        <span class="bidder-name">
-                                            @if($bid->user)
-                                                {{ substr($bid->user->name, 0, 1) }}*****{{ substr($bid->user->name, -1) }}
-                                            @else
-                                                Anonymous
-                                            @endif
-                                        </span>
-                                        <span class="bid-price">AED {{ number_format($bid->amount, 2) }}</span>
-                                    </div>
-                                    <div class="bid-time">{{ $bid->created_at->diffForHumans() }}</div>
-                                </li>
-                            @endforeach
-                        </ul>
-                    @else
-                        <p class="no-bids">No bids placed yet. Be the first!</p>
-                    @endif
+                    <h3>Recent Bids <small id="bids-count" style="color: #666; font-size: 14px;"></small></h3>
+
+                    <div class="table-responsive">
+                        <table id="recent-bids-table" class="display" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Bidder</th>
+                                    <th>Time</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- DataTable will populate this via AJAX -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 
                 <div class="auction-share">
@@ -908,6 +944,49 @@ function changeMainImage(imageSrc, thumbnailElement) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Show More/Show Less functionality for description (Mobile only)
+    const descriptionContent = document.getElementById('product-description');
+    const toggleBtn = document.getElementById('toggle-description-btn');
+
+    if (descriptionContent && toggleBtn) {
+        // Check if we're on mobile and description is long enough
+        function checkDescriptionHeight() {
+            if (window.innerWidth <= 768) {
+                // Add collapsed class initially on mobile
+                descriptionContent.classList.add('collapsed');
+
+                // Check if content is actually taller than max-height
+                if (descriptionContent.scrollHeight > 100) {
+                    toggleBtn.style.display = 'inline-block';
+                } else {
+                    toggleBtn.style.display = 'none';
+                    descriptionContent.classList.remove('collapsed');
+                }
+            } else {
+                // Remove collapsed class on desktop
+                descriptionContent.classList.remove('collapsed');
+                toggleBtn.style.display = 'none';
+            }
+        }
+
+        // Initial check
+        checkDescriptionHeight();
+
+        // Re-check on window resize
+        window.addEventListener('resize', checkDescriptionHeight);
+
+        // Toggle button click handler
+        toggleBtn.addEventListener('click', function() {
+            if (descriptionContent.classList.contains('collapsed')) {
+                descriptionContent.classList.remove('collapsed');
+                toggleBtn.textContent = 'Show Less';
+            } else {
+                descriptionContent.classList.add('collapsed');
+                toggleBtn.textContent = 'Show More';
+            }
+        });
+    }
+
     // Tab switching functionality
     const tabs = document.querySelectorAll('.auction-detail-tabs .auction-tab');
     const tabPanels = document.querySelectorAll('.tab-panel');
@@ -967,10 +1046,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     countdownElement.classList.add('urgent');
                     progressBar.style.width = "100%";
 
-                    // Reload page to show ended auction state
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 2000);
+                    // Show alert dialog and reload page
+                    alert('This auction has ended!');
+                    window.location.reload();
 
                     return;
                 }
@@ -1013,11 +1091,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 progressBar.style.width = progress + "%";
 
             }, 1000);
-
-            // Auto-refresh page every 3 seconds to get latest auction data
-            setInterval(function() {
-                window.location.reload();
-            }, 3000);
         @endif
     }
 
@@ -1275,4 +1348,164 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
+<!-- DataTables CSS and JS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+
+<style>
+/* DataTable Styling */
+.table-responsive {
+    margin-top: 15px;
+    overflow-x: auto;
+}
+
+#recent-bids-table {
+    width: 100% !important;
+    font-size: 14px;
+    border: none !important;
+}
+
+#recent-bids-table thead {
+    display: none !important; /* Hide the entire header row */
+}
+
+#recent-bids-table thead th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    padding: 12px 8px;
+    border: none !important;
+}
+
+#recent-bids-table tbody td {
+    padding: 10px 8px;
+    vertical-align: middle;
+    border: none !important;
+}
+
+#recent-bids-table tbody tr {
+    border: none !important;
+}
+
+#recent-bids-table tbody tr:hover {
+    background-color: transparent; /* Remove gray hover effect */
+}
+
+/* Amount cell styling */
+#recent-bids-table .amount-cell {
+    text-align: right !important;
+    font-weight: 600 !important;
+    color: #ff5500 !important;
+    font-size: 15px !important;
+}
+
+#recent-bids-table thead th:last-child {
+    text-align: right !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding: 0.5em 1em;
+    margin-left: 2px;
+}
+
+.dataTables_wrapper .dataTables_info {
+    padding-top: 1em;
+    font-size: 13px;
+}
+
+.dataTables_wrapper .dataTables_filter {
+    float: right;
+    text-align: right;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    margin-left: 0.5em;
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.dataTables_wrapper .dataTables_length select {
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin: 0 5px;
+}
+</style>
+
+<script>
+$(document).ready(function() {
+    let recentBidsTable;
+    const auctionId = '{{ $auction->id }}';
+    const apiUrl = '{{ route("api.auction.recent-bids", ["auctionId" => $auction->id]) }}';
+
+    // Initialize DataTable
+    function initializeDataTable() {
+        recentBidsTable = $('#recent-bids-table').DataTable({
+            ajax: {
+                url: apiUrl,
+                dataSrc: function(json) {
+                    // Update the count
+                    $('#bids-count').text('(' + json.total + ' total bids)');
+                    return json.data;
+                },
+                error: function(xhr, error, thrown) {
+                    console.error('Error fetching bids:', error);
+                }
+            },
+            columns: [
+                { data: 'bidder', width: '30%' },
+                { data: 'time_ago', width: '40%' },
+                {
+                    data: 'amount',
+                    width: '30%',
+                    className: 'text-right amount-cell' // Add custom class for styling
+                }
+            ],
+            order: [[2, 'desc']], // Order by time (most recent first)
+            paging: false, // Disable pagination - show all bids
+            searching: false, // Disable search box
+            info: false, // Disable "Showing X to Y of Z entries"
+            lengthChange: false, // Disable "Show X entries" dropdown
+            responsive: true,
+            autoWidth: false,
+            stripeClasses: [], // Remove odd/even row classes
+            language: {
+                emptyTable: "No bids placed yet. Be the first!",
+                info: "Showing _START_ to _END_ of _TOTAL_ bids",
+                infoEmpty: "Showing 0 to 0 of 0 bids",
+                infoFiltered: "(filtered from _MAX_ total bids)",
+                search: "Search bids:",
+                lengthMenu: "Show _MENU_ bids per page",
+                paginate: {
+                    first: "First",
+                    last: "Last",
+                    next: "Next",
+                    previous: "Previous"
+                }
+            },
+            drawCallback: function(settings) {
+                console.log('DataTable reloaded at:', new Date().toLocaleTimeString());
+            }
+        });
+    }
+
+    // Initialize the table on page load
+    initializeDataTable();
+
+    // Auto-refresh every 3 seconds
+    setInterval(function() {
+        if (recentBidsTable) {
+            recentBidsTable.ajax.reload(null, false); // false = stay on current page
+            console.log('Refreshing bids table...');
+        }
+    }, 3000); // 3000ms = 3 seconds
+
+    console.log('Recent Bids DataTable initialized with auto-refresh every 3 seconds');
+});
+</script>
+
 @endsection
