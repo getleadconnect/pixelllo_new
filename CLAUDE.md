@@ -22,6 +22,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Recent Updates
 
 ### October 7, 2025
+- **Automatic Bidding System**: Implemented automatic bidding functionality on auction detail page
+  - Users can set auto-bids with a maximum bid count (`max_bids` in `auto_bids` table)
+  - System automatically places bids when last bidder is not the current user
+  - Auto-bid decrements `bids_left` with each bid placed
+  - Auto-bidding stops when:
+    - `bids_left` reaches 0
+    - User's `bid_balance` reaches 0
+    - Auction ends
+  - New API endpoint: `/api/auctions/{auctionId}/auto-bid-status` - Returns auto-bid status and determines if bid should be placed
+  - Updated `placeBid()` to accept `is_auto_bid` parameter and decrement auto-bid counts
+  - Auto-bid status displayed with animated gradient box showing remaining bids
+  - System checks auto-bid conditions every 2 seconds
+  - Shows SweetAlert2 notifications when auto-bid is placed or stopped
+  - Automatically deactivates auto-bid (`is_active = false`) when user has no bid balance
+
 - **Auction Detail Page Auto-Refresh Control**: Fixed auction detail page to stop auto-refreshing when auction ends
   - Auto-refresh (3-second interval) now only runs for active auctions (`$auction->status === 'active' && $auction->endTime > now()`)
   - Countdown timer automatically stops the auto-refresh interval when auction ends

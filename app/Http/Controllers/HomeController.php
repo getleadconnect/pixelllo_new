@@ -512,6 +512,15 @@ class HomeController extends Controller
             ->take(4)
             ->get();
 
+        // Get auto-bid settings for current user (if authenticated)
+        $autoBid = null;
+        if (Auth::check()) {
+            $autoBid = AutoBid::where('user_id', Auth::id())
+                ->where('auction_id', $auction->id)
+                ->where('is_active', true)
+                ->first();
+        }
+
         return view('auction-detail', compact(
             'auction',
             'totalBids',
@@ -519,7 +528,8 @@ class HomeController extends Controller
             'timeProgress',
             'timeLeft',
             'savingsPercentage',
-            'similarAuctions'
+            'similarAuctions',
+            'autoBid'
         ));
     }
 
@@ -536,6 +546,7 @@ class HomeController extends Controller
             // Validate request
             $validator = Validator::make($request->all(), [
                 'auction_id' => 'required|exists:auctions,id',
+                'is_auto_bid' => 'sometimes|boolean',
             ]);
 
             if ($validator->fails()) {
@@ -583,6 +594,24 @@ class HomeController extends Controller
                 ], 403);
             }
 
+            // Check if this is an auto-bid and decrement auto-bid count
+            $isAutoBid = $request->input('is_auto_bid', false);
+            $autoBid = null;
+
+            if ($isAutoBid) {
+                $autoBid = AutoBid::where('user_id', $user->id)
+                    ->where('auction_id', $auction->id)
+                    ->where('is_active', true)
+                    ->first();
+
+                if (!$autoBid || $autoBid->bids_left <= 0) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'No active auto-bid or bids remaining.'
+                    ], 403);
+                }
+            }
+
             // Start a database transaction
             DB::beginTransaction();
 
@@ -608,6 +637,18 @@ class HomeController extends Controller
                 $bid->amount = $newPrice;
                 $bid->save();
 
+                // If this was an auto-bid, decrement the bids_left count
+                if ($isAutoBid && $autoBid) {
+                    $autoBid->bids_left -= 1;
+
+                    // Deactivate auto-bid if no bids left
+                    if ($autoBid->bids_left <= 0) {
+                        $autoBid->is_active = false;
+                    }
+
+                    $autoBid->save();
+                }
+
                 // Commit the transaction
                 DB::commit();
 
@@ -618,7 +659,11 @@ class HomeController extends Controller
                     'data' => [
                         'auction' => $auction,
                         'bid' => $bid,
-                        'userBidCredits' => $user->bid_balance
+                        'userBidCredits' => $user->bid_balance,
+                        'autoBid' => $autoBid ? [
+                            'bids_left' => $autoBid->bids_left,
+                            'is_active' => $autoBid->is_active
+                        ] : null
                     ]
                 ]);
             } catch (\Exception $e) {
@@ -849,6 +894,82 @@ class HomeController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to fetch bids',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get auto-bid status for current user on an auction
+     */
+    public function getAutoBidStatus($auctionId)
+    {
+        try {
+            if (!Auth::check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not authenticated'
+                ], 401);
+            }
+
+            // Get auction
+            $auction = Auction::findOrFail($auctionId);
+
+            // Get latest bid
+            $latestBid = Bid::where('auction_id', $auctionId)
+                ->with('user')
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            // Get current user
+            $user = Auth::user();
+
+            // Get auto-bid for current user
+            $autoBid = AutoBid::where('user_id', Auth::id())
+                ->where('auction_id', $auctionId)
+                ->where('is_active', true)
+                ->first();
+
+            $response = [
+                'success' => true,
+                'auction_status' => $auction->status,
+                'has_auto_bid' => $autoBid ? true : false,
+                'latest_bid_user_id' => $latestBid ? $latestBid->user_id : null,
+                'current_user_id' => Auth::id(),
+                'user_bid_balance' => $user->bid_balance,
+                'should_auto_bid' => false,
+            ];
+
+            if ($autoBid) {
+                $response['auto_bid'] = [
+                    'max_bids' => $autoBid->max_bids,
+                    'bids_left' => $autoBid->bids_left,
+                    'is_active' => $autoBid->is_active,
+                ];
+
+                // Determine if auto-bid should be triggered
+                // Check: active, bids left, auction active, last bidder is not current user, AND user has bid balance
+                $response['should_auto_bid'] =
+                    $autoBid->is_active &&
+                    $autoBid->bids_left > 0 &&
+                    $user->bid_balance > 0 &&
+                    $auction->status === 'active' &&
+                    ($latestBid && $latestBid->user_id !== Auth::id());
+
+                // Deactivate auto-bid if user has no bid balance
+                if ($user->bid_balance <= 0 && $autoBid->is_active) {
+                    $autoBid->is_active = false;
+                    $autoBid->save();
+                    $response['auto_bid']['is_active'] = false;
+                    $response['has_auto_bid'] = false;
+                }
+            }
+
+            return response()->json($response);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch auto-bid status',
                 'error' => $e->getMessage()
             ], 500);
         }

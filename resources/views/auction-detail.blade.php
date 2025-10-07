@@ -293,6 +293,33 @@
     line-height: 1.5;
 }
 
+.auto-bid-status-box {
+    margin: 15px 0;
+    padding: 12px 15px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+    animation: pulse-glow 2s infinite;
+}
+
+.auto-bid-status-box i {
+    margin-right: 8px;
+    font-size: 16px;
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+    }
+    50% {
+        box-shadow: 0 2px 20px rgba(102, 126, 234, 0.6);
+    }
+}
+
 .recent-bids, .auction-share {
     padding: 25px;
     border-radius: 10px;
@@ -742,6 +769,16 @@
                             <button class="btn btn-primary btn-block-auto btn-bid">Place Bid Now</button>
                             <button class="btn btn-outline btn-block-auto btn-autobid">Set Auto-Bidder</button>
                         </div>
+
+                        @auth
+                        @if($autoBid && $autoBid->is_active)
+                        <div id="auto-bid-status" class="auto-bid-status-box">
+                            <i class="fas fa-robot"></i> Auto-Bid Active: {{ $autoBid->bids_left }} / {{ $autoBid->max_bids }} bids remaining
+                        </div>
+                        @else
+                        <div id="auto-bid-status" class="auto-bid-status-box" style="display: none;"></div>
+                        @endif
+                        @endauth
 
                         <div class="bid-notice">
                             <p>Placing a bid will cost you 1 bid credit and extend the auction by {{ $auction->extensionTime }} seconds!</p>
@@ -1485,8 +1522,11 @@ document.addEventListener('DOMContentLoaded', function() {
 $(document).ready(function() {
     let recentBidsTable;
     let autoRefreshInterval; // Declare in outer scope for access from countdown timer
+    let autoBidCheckInterval; // For checking auto-bid conditions
     const auctionId = '{{ $auction->id }}';
     const apiUrl = '{{ route("api.auction.recent-bids", ["auctionId" => $auction->id]) }}';
+    const autoBidStatusUrl = '{{ route("api.auction.auto-bid-status", ["auctionId" => $auction->id]) }}';
+    let isAutoBidding = false; // Flag to prevent concurrent auto-bids
 
     // Initialize DataTable
     function initializeDataTable() {
@@ -1555,6 +1595,148 @@ $(document).ready(function() {
     @else
     console.log('Auction is not active - auto-refresh disabled');
     @endif
+
+    // Auto-bidding logic - check if user has auto-bid enabled
+    @auth
+    @if($auction->status === 'active' && $auction->endTime > now())
+    function checkAndPlaceAutoBid() {
+        if (isAutoBidding) {
+            console.log('Auto-bid already in progress, skipping...');
+            return;
+        }
+
+        fetch(autoBidStatusUrl, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.should_auto_bid) {
+                console.log('Auto-bid conditions met. Placing bid automatically...');
+                console.log('Auto-bid status:', data.auto_bid);
+                placeAutoBid();
+            } else if (data.has_auto_bid) {
+                console.log('Auto-bid active but conditions not met:', {
+                    bids_left: data.auto_bid?.bids_left,
+                    bid_balance: data.user_bid_balance,
+                    latest_bidder_is_current_user: data.latest_bid_user_id === data.current_user_id
+                });
+
+                // Update auto-bid status display
+                updateAutoBidDisplay(data.auto_bid);
+
+                // Check if auto-bid was stopped due to insufficient balance
+                if (data.user_bid_balance <= 0 && data.auto_bid && !data.auto_bid.is_active) {
+                    // Stop checking for auto-bids
+                    if (autoBidCheckInterval) {
+                        clearInterval(autoBidCheckInterval);
+                        console.log('Auto-bid stopped - insufficient bid balance');
+                    }
+
+                    // Show notification
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: 'Auto-Bid Stopped',
+                            text: 'Your auto-bid has been stopped because you have no bid credits remaining. Please purchase more bids to continue.',
+                            icon: 'warning',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#ff5500'
+                        });
+                    }
+                }
+            } else if (data.has_auto_bid === false && data.auto_bid && !data.auto_bid.is_active) {
+                // Auto-bid was deactivated (could be due to no balance or no bids left)
+                if (autoBidCheckInterval) {
+                    clearInterval(autoBidCheckInterval);
+                    console.log('Auto-bid stopped - deactivated');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error checking auto-bid status:', error);
+        });
+    }
+
+    function placeAutoBid() {
+        isAutoBidding = true;
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        fetch('{{ url(route('bid.now')) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                auction_id: auctionId,
+                is_auto_bid: true
+            }),
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                console.log('Auto-bid placed successfully!', data);
+
+                // Update the UI
+                if (recentBidsTable) {
+                    recentBidsTable.ajax.reload(null, false);
+                }
+
+                // Show notification
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Auto-Bid Placed!',
+                        text: 'Your auto-bid was placed successfully.',
+                        icon: 'success',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                }
+            } else {
+                console.error('Auto-bid failed:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error placing auto-bid:', error);
+        })
+        .finally(() => {
+            isAutoBidding = false;
+        });
+    }
+
+    function updateAutoBidDisplay(autoBidData) {
+        const autoBidStatus = document.getElementById('auto-bid-status');
+        if (autoBidStatus && autoBidData) {
+            if (autoBidData.is_active && autoBidData.bids_left > 0) {
+                autoBidStatus.style.display = 'block';
+                autoBidStatus.innerHTML = `
+                    <i class="fas fa-robot"></i> Auto-Bid Active: ${autoBidData.bids_left} / ${autoBidData.max_bids} bids remaining
+                `;
+            } else {
+                autoBidStatus.style.display = 'none';
+            }
+        }
+    }
+
+    // Check auto-bid status every 2 seconds
+    autoBidCheckInterval = setInterval(checkAndPlaceAutoBid, 2000);
+
+    // Initial check
+    checkAndPlaceAutoBid();
+
+    console.log('Auto-bidding system initialized');
+    @endif
+    @endauth
 });
 </script>
 
