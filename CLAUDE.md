@@ -21,6 +21,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Recent Updates
 
+### October 7, 2025
+- **Auction Detail Page Auto-Refresh Control**: Fixed auction detail page to stop auto-refreshing when auction ends
+  - Auto-refresh (3-second interval) now only runs for active auctions (`$auction->status === 'active' && $auction->endTime > now()`)
+  - Countdown timer automatically stops the auto-refresh interval when auction ends
+  - Shows "The auction has ended." message using SweetAlert2 when countdown reaches zero
+  - Page reloads once after showing the end message to display final auction state
+  - Prevents unnecessary server load from ended auctions constantly refreshing
+
 ### October 3, 2025
 - **Time Remaining Fix**: Fixed auction detail page to correctly display time remaining countdown
   - Updated `HomeController::auctionDetail()` to properly calculate time remaining using `now()->diffInSeconds($auction->endTime)`

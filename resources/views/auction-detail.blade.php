@@ -1047,11 +1047,31 @@ document.addEventListener('DOMContentLoaded', function() {
                     countdownElement.classList.add('urgent');
                     progressBar.style.width = "100%";
 
-                    // Show alert dialog only once and reload page
+                    // Stop auto-refresh interval if it exists
+                    if (typeof autoRefreshInterval !== 'undefined') {
+                        clearInterval(autoRefreshInterval);
+                        console.log('Auto-refresh stopped - auction ended');
+                    }
+
+                    // Show alert dialog only once
                     if (!auctionEndAlertShown) {
                         auctionEndAlertShown = true;
-                        alert('This auction has ended!');
-                        window.location.reload();
+
+                        // Show custom message using SweetAlert2 if available, otherwise use alert
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                title: 'Auction Ended',
+                                text: 'The auction has ended.',
+                                icon: 'info',
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#ff5500'
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            alert('The auction has ended.');
+                            window.location.reload();
+                        }
                     }
 
                     return;
@@ -1104,6 +1124,21 @@ document.addEventListener('DOMContentLoaded', function() {
         bidButton.addEventListener('click', function() {
             // Check if user is authenticated
             @auth
+                // Check if auction has ended (client-side check)
+                @if($auction->status === 'ended' || $auction->endTime < now())
+                    alert('This auction has ended!');
+                    window.location.reload();
+                    return;
+                @endif
+
+                // Check if countdown shows ENDED
+                const countdownElement = document.getElementById('time-countdown');
+                if (countdownElement && countdownElement.textContent === 'ENDED') {
+                    alert('This auction has ended!');
+                    window.location.reload();
+                    return;
+                }
+
                 // Show confirmation modal
                 if (confirm('Are you sure you want to place a bid of AED {{ number_format($auction->currentPrice + $auction->bidIncrement, 2) }}? This will cost you 1 bid credit.')) {
                     // Set loading state on button
@@ -1201,7 +1236,13 @@ document.addEventListener('DOMContentLoaded', function() {
                                     alert(errorData.message || 'You are not authorized to place this bid.');
                                 }
                             } else if (error.status === 422) {
-                                alert(errorData.message || 'Invalid bid. Please try again.');
+                                // Check if auction ended
+                                if (errorData.message && (errorData.message.includes('ended') || errorData.message.includes('not active'))) {
+                                    alert('This auction has ended!');
+                                    window.location.reload();
+                                } else {
+                                    alert(errorData.message || 'Invalid bid. Please try again.');
+                                }
                             } else {
                                 alert('Error: ' + (errorData.message || 'Unknown error occurred'));
                             }
@@ -1443,6 +1484,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
 $(document).ready(function() {
     let recentBidsTable;
+    let autoRefreshInterval; // Declare in outer scope for access from countdown timer
     const auctionId = '{{ $auction->id }}';
     const apiUrl = '{{ route("api.auction.recent-bids", ["auctionId" => $auction->id]) }}';
 
@@ -1500,8 +1542,9 @@ $(document).ready(function() {
     // Initialize the table on page load
     initializeDataTable();
 
-    // Auto-refresh every 3 seconds
-    setInterval(function() {
+    // Auto-refresh every 3 seconds (only if auction is active)
+    @if($auction->status === 'active' && $auction->endTime > now())
+    autoRefreshInterval = setInterval(function() {
         if (recentBidsTable) {
             recentBidsTable.ajax.reload(null, false); // false = stay on current page
             console.log('Refreshing bids table...');
@@ -1509,6 +1552,9 @@ $(document).ready(function() {
     }, 3000); // 3000ms = 3 seconds
 
     console.log('Recent Bids DataTable initialized with auto-refresh every 3 seconds');
+    @else
+    console.log('Auction is not active - auto-refresh disabled');
+    @endif
 });
 </script>
 
