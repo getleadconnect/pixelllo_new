@@ -541,17 +541,16 @@ class HomeController extends Controller
         }
 
         // Get similar auctions (active, ending soon, featured, upcoming) - from all categories
+        // Exclude ended auctions (status = 'ended' OR endTime < now)
         $now = now();
         $similarAuctions = Auction::where('id', '!=', $auction->id)
+            ->where('status', '!=', 'ended')  // Exclude ended status
+            ->where('endTime', '>', $now)  // Exclude auctions past end time
             ->where(function($query) use ($now) {
-                // Include: Active (not ended), Featured, or Upcoming auctions
-                $query->where(function($q) use ($now) {
-                    // Active auctions (not ended)
-                    $q->where('status', 'active')
-                      ->where('endTime', '>', $now);
-                })
-                ->orWhere('featured', true)  // Featured auctions
-                ->orWhere('status', 'upcoming');  // Upcoming auctions
+                // Include: Active, Featured, or Upcoming auctions
+                $query->where('status', 'active')
+                      ->orWhere('featured', true)
+                      ->orWhere('status', 'upcoming');
             })
             ->orderByRaw("CASE
                 WHEN status = 'active' AND endTime > NOW() AND endTime <= DATE_ADD(NOW(), INTERVAL 24 HOUR) THEN 0

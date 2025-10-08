@@ -649,6 +649,41 @@
     overflow: hidden;
 }
 
+.auction-times {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.time-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 6px;
+}
+
+.time-item:last-child {
+    margin-bottom: 0;
+}
+
+.time-item i {
+    color: var(--primary-color);
+    font-size: 14px;
+}
+
+.time-label {
+    font-weight: 600;
+    color: #666;
+}
+
+.time-value {
+    color: #333;
+    font-weight: 500;
+}
+
 .auction-info {
     display: flex;
     justify-content: space-between;
@@ -659,7 +694,7 @@
 
 .auction-price {
     font-weight: 700;
-    color: var(--primary-color);
+    color: #e9922b;
 }
 
 .auction-time {
@@ -1081,7 +1116,7 @@
         </div>
         
         <div class="similar-auctions">
-            <h2>Similar Auctions</h2>
+            <h2><span style="border-bottom:2px solid #ffdd00;">Similar Auctions</span></h2>
             <div class="auctions-grid">
                 @foreach($similarAuctions as $similarAuction)
                     <div class="auction-card">
@@ -1100,8 +1135,18 @@
                         <div class="auction-content">
                             <div class="auction-category">{{ $similarAuction->category->name }}</div>
                             <h3 class="auction-title">{{ $similarAuction->title }}</h3>
+
+                            <!-- Start Time and End Time -->
+                            <div class="auction-times">
+                                <label> Time : </label>
+                                <div class="time-item">
+                                    <span class="time-value">{{ $similarAuction->startTime->format('M d, h:i A') }}</span> - 
+                                    <span class="time-value">{{ $similarAuction->endTime->format('M d, h:i A') }}</span>
+                                </div>
+                            </div>
+
                             <div class="auction-info">
-                                <span class="auction-price">Current Bid: AED {{ number_format($similarAuction->currentPrice, 2) }}</span>
+                                <span class="auction-price">Current Bid: <br>AED {{ number_format($similarAuction->currentPrice, 2) }}</span>
                                 <span class="auction-time"><i class="fas fa-clock"></i> {{ now()->diffForHumans($similarAuction->endTime, ['parts' => 1]) }}</span>
                             </div>
                             <div class="auction-progress">
@@ -1111,7 +1156,9 @@
                                     $elapsed = now()->diffInSeconds($similarAuction->startTime);
                                     $progress = min(100, max(0, ($elapsed / $totalDuration) * 100));
                                 @endphp
-                                <div class="progress-bar" style="width: {{ $progress }}%;"></div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: {{ $progress }}%;"></div>
+                                </div>
                             </div>
                             <div class="auction-retail">
                                 <span class="retail-price">Retail Price: AED {{ number_format($similarAuction->retailPrice, 2) }}</span>
