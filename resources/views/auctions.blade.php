@@ -30,63 +30,183 @@
 
 .auctions-filter-container {
     margin-bottom: 30px;
+}
+
+.search-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
     background-color: #f8f9fa;
     border-radius: 8px;
 }
 
-.auctions-filter-search-row {
+.search-wrapper {
+    flex: 1;
     display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.filter-search {
-    display: flex;
+    align-items: center;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    overflow: hidden;
 }
 
 .search-input {
     flex: 1;
-    border: 1px solid #ddd;
-    border-radius: 4px 0 0 4px;
-    padding: 10px 15px;
+    border: none;
+    padding: 12px 15px;
     font-size: 1rem;
+    outline: none;
 }
 
 .search-btn {
-    border-radius: 0 4px 4px 0;
-    padding: 0 15px;
+    background-color: var(--primary);
+    border: none;
+    padding: 12px 20px;
+    cursor: pointer;
+    color: white;
+    transition: background-color 0.3s;
 }
 
-.auctions-filter-row {
+.search-btn:hover {
+    background-color: var(--primary-dark);
+}
+
+.filter-toggle-btn {
+    position: relative;
+    background-color: white;
+    border: 2px solid #ddd;
+    padding: 12px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #333;
     display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
     align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+    white-space: nowrap;
+}
+
+.filter-toggle-btn:hover {
+    background-color: #e9ecef;
+    border-color: #999;
+    color: #000;
+}
+
+.filter-toggle-btn.active {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.filter-toggle-btn.active:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.filter-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    padding: 20px;
+    min-width: 350px;
+    z-index: 1000;
+    display: none;
+}
+
+.filter-dropdown.show {
+    display: block;
+}
+
+.filter-dropdown-header {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--dark);
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0f0f0;
 }
 
 .filter-group {
-    flex: 1;
-    min-width: 200px;
+    margin-bottom: 15px;
+}
+
+.filter-label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 8px;
 }
 
 .filter-select {
     width: 100%;
     border: 1px solid #ddd;
-    border-radius: 4px;
+    border-radius: 6px;
     padding: 10px 15px;
     font-size: 1rem;
     appearance: none;
+    background-color: white;
     background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
     background-repeat: no-repeat;
     background-position: right 10px center;
+    background-size: 20px;
+    cursor: pointer;
+    transition: border-color 0.3s;
 }
 
-.filter-reset {
-    background-color: transparent;
-    border: 1px solid #ddd;
+.filter-select:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.filter-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.filter-apply-btn {
+    flex: 1;
+    background-color: #f89500;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.filter-apply-btn:hover {
+    background-color: #cf7e03;
+}
+
+.filter-reset-btn {
+    flex: 1;
+    background-color: white;
     color: var(--dark);
-    padding: 10px 15px;
-    white-space: nowrap;
+    border: 1px solid #ddd;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.filter-reset-btn:hover {
+    background-color: #f8f9fa;
+    border-color: #999;
 }
 
 .auctions-count {
@@ -357,26 +477,43 @@
 }
 
 @media (max-width: 768px) {
-    .filter-group {
-        min-width: 100%;
-    }
-    
-    .auctions-filter-row {
+    .search-filter-bar {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
+    .search-wrapper {
+        width: 100%;
+    }
+
+    .filter-toggle-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .filter-dropdown {
+        left: 0;
+        right: 0;
+        min-width: auto;
+        width: calc(100% - 30px);
+        margin: 0 15px;
+    }
+
     .page-header h1 {
         font-size: 2rem;
     }
-    
+
     .auction-card {
         min-width: 100%;
     }
-    
+
     .pagination-item {
         width: 35px;
         height: 35px;
+    }
+
+    .auctions-grid {
+        grid-template-columns: 1fr;
     }
 }
 </style>
@@ -390,43 +527,74 @@
         </div>
 
         <div class="auctions-filter-container">
-            <div class="auctions-filter-search-row">
-                <div class="filter-search">
-                    <input type="text" placeholder="Search auctions..." class="search-input" value="{{ request('search') }}">
-                    <button class="btn btn-primary search-btn"><i class="fas fa-search"></i></button>
+            <div class="search-filter-bar">
+                <!-- Search Box - Left Side -->
+                <div class="search-wrapper">
+                    <input type="text" placeholder="Search auctions..." class="search-input" id="search-input" value="{{ request('search') }}">
+                    <button class="search-btn" id="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
                 </div>
 
-                <div class="auctions-filter-row">
-                    <div class="filter-group">
-                        <select id="filter-category" name="filter-category" class="filter-select">
-                            <option value="all" {{ request('category') == null || request('category') == 'all' ? 'selected' : '' }}>All Categories</option>
-                            @foreach($categories as $category)
-                            <option value="{{ $category->slug }}" {{ request('category') == $category->slug ? 'selected' : '' }}>{{ $category->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                <!-- Filter Button - Right Side -->
+                <div style="position: relative;">
+                    <button class="filter-toggle-btn" id="filter-toggle-btn">
+                        <i class="fas fa-filter"></i>
+                        <span>Filters</span>
+                        @if(request('status') || request('category') || request('sort'))
+                            <span style="background-color: var(--secondary); color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold;">●</span>
+                        @endif
+                    </button>
 
-                    <div class="filter-group">
-                        <select id="filter-sort" class="filter-select">
-                            <option value="ending-soon" {{ request('sort') == 'ending-soon' || !request('sort') ? 'selected' : '' }}>Ending Soon</option>
-                            <option value="price-low" {{ request('sort') == 'price-low' ? 'selected' : '' }}>Price: Low to High</option>
-                            <option value="price-high" {{ request('sort') == 'price-high' ? 'selected' : '' }}>Price: High to Low</option>
-                            <option value="bids" {{ request('sort') == 'bids' ? 'selected' : '' }}>Most Bids</option>
-                            <option value="featured" {{ request('sort') == 'featured' ? 'selected' : '' }}>Featured</option>
-                            <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>Newest</option>
-                        </select>
-                    </div>
+                    <!-- Filter Dropdown Modal -->
+                    <div class="filter-dropdown" id="filter-dropdown">
+                        <div class="filter-dropdown-header">
+                            <i class="fas fa-sliders-h"></i> Filter Auctions
+                        </div>
 
-                    <div class="filter-group">
-                        <select id="filter-status" class="filter-select">
-                            <option value="all" {{ request('status') == null || request('status') == 'all' ? 'selected' : '' }}>All Auctions</option>
-                            <option value="live" {{ request('status') == 'live' ? 'selected' : '' }}>Live Auctions</option>
-                            <option value="ending-soon" {{ request('status') == 'ending-soon' ? 'selected' : '' }}>Ending Soon</option>
-                            <option value="upcoming" {{ request('status') == 'upcoming' ? 'selected' : '' }}>Upcoming</option>
-                        </select>
-                    </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Category</label>
+                            <select id="filter-category" name="filter-category" class="filter-select">
+                                <option value="all" {{ request('category') == null || request('category') == 'all' ? 'selected' : '' }}>All Categories</option>
+                                @foreach($categories as $category)
+                                <option value="{{ $category->slug }}" {{ request('category') == $category->slug ? 'selected' : '' }}>{{ $category->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
 
-                    <button class="btn filter-reset"><i class="fas fa-redo-alt"></i> Reset</button>
+                        <div class="filter-group">
+                            <label class="filter-label">Sort By</label>
+                            <select id="filter-sort" class="filter-select">
+                                <option value="">Default (Ending Soon First)</option>
+                                <option value="ending-soon" {{ request('sort') == 'ending-soon' ? 'selected' : '' }}>Ending Soon</option>
+                                <option value="price-low" {{ request('sort') == 'price-low' ? 'selected' : '' }}>Price: Low to High</option>
+                                <option value="price-high" {{ request('sort') == 'price-high' ? 'selected' : '' }}>Price: High to Low</option>
+                                <option value="bids" {{ request('sort') == 'bids' ? 'selected' : '' }}>Most Bids</option>
+                                <option value="featured" {{ request('sort') == 'featured' ? 'selected' : '' }}>Featured</option>
+                                <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>Newest</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label class="filter-label">Status</label>
+                            <select id="filter-status" class="filter-select">
+                                <option value="" {{ request('status') == null ? 'selected' : '' }}>All Auctions</option>
+                                <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="ending-soon" {{ request('status') == 'ending-soon' ? 'selected' : '' }}>Ending Soon</option>
+                                <option value="upcoming" {{ request('status') == 'upcoming' ? 'selected' : '' }}>Upcoming</option>
+                                <option value="ended" {{ request('status') == 'ended' ? 'selected' : '' }}>Ended/Closed</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-actions">
+                            <button class="filter-apply-btn" id="apply-filters-btn">
+                                <i class="fas fa-check"></i> Apply Filters
+                            </button>
+                            <button class="filter-reset-btn" id="reset-filters-btn">
+                                <i class="fas fa-redo-alt"></i> Reset
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -572,84 +740,118 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Filter functionality
+    // Filter dropdown toggle functionality
+    const filterToggleBtn = document.getElementById('filter-toggle-btn');
+    const filterDropdown = document.getElementById('filter-dropdown');
+    const applyFiltersBtn = document.getElementById('apply-filters-btn');
+    const resetFiltersBtn = document.getElementById('reset-filters-btn');
+    const searchInput = document.getElementById('search-input');
+    const searchButton = document.getElementById('search-btn');
+
     const filterCategory = document.getElementById('filter-category');
     const filterSort = document.getElementById('filter-sort');
     const filterStatus = document.getElementById('filter-status');
-    const resetButton = document.querySelector('.filter-reset');
-    const searchInput = document.querySelector('.search-input');
-    const searchButton = document.querySelector('.search-btn');
-    
-    // Add event listeners for filter changes
+
+    // Toggle filter dropdown
+    filterToggleBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        filterDropdown.classList.toggle('show');
+        filterToggleBtn.classList.toggle('active');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!filterDropdown.contains(e.target) && !filterToggleBtn.contains(e.target)) {
+            filterDropdown.classList.remove('show');
+            filterToggleBtn.classList.remove('active');
+        }
+    });
+
+    // Prevent dropdown from closing when clicking inside
+    filterDropdown.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+
+    // Apply filters function
     const applyFilters = () => {
         const params = new URLSearchParams(window.location.search);
-        
+
+        // Category filter
         if (filterCategory.value !== 'all') {
             params.set('category', filterCategory.value);
         } else {
             params.delete('category');
         }
-        
-        if (filterSort.value !== 'ending-soon') {
+
+        // Sort filter
+        if (filterSort.value && filterSort.value !== '') {
             params.set('sort', filterSort.value);
         } else {
             params.delete('sort');
         }
-        
-        if (filterStatus.value !== 'all') {
+
+        // Status filter
+        if (filterStatus.value && filterStatus.value !== '') {
             params.set('status', filterStatus.value);
         } else {
             params.delete('status');
         }
-        
+
+        // Search
         const searchValue = searchInput.value.trim();
         if (searchValue) {
             params.set('search', searchValue);
         } else {
             params.delete('search');
         }
-        
+
         // Reload page with filters
         window.location.href = `${window.location.pathname}?${params.toString()}`;
     };
-    
-    // Set up event listeners
-    filterCategory.addEventListener('change', applyFilters);
-    filterSort.addEventListener('change', applyFilters);
-    filterStatus.addEventListener('change', applyFilters);
-    searchButton.addEventListener('click', applyFilters);
+
+    // Apply filters button click
+    applyFiltersBtn.addEventListener('click', function() {
+        applyFilters();
+    });
+
+    // Reset filters button click
+    resetFiltersBtn.addEventListener('click', function() {
+        window.location.href = window.location.pathname;
+    });
+
+    // Search button click
+    searchButton.addEventListener('click', function() {
+        applyFilters();
+    });
+
+    // Search on Enter key
     searchInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             applyFilters();
         }
     });
-    
-    // Reset filter
-    resetButton.addEventListener('click', function() {
-        window.location.href = window.location.pathname;
-    });
-    
+
     // Set current filter values from URL params
     const setFilterValues = () => {
         const params = new URLSearchParams(window.location.search);
-        
+
         if (params.has('category')) {
             filterCategory.value = params.get('category');
         }
-        
+
         if (params.has('sort')) {
             filterSort.value = params.get('sort');
         }
-        
+
         if (params.has('status')) {
             filterStatus.value = params.get('status');
         }
-        
+
         if (params.has('search')) {
             searchInput.value = params.get('search');
         }
     };
-    
+
     setFilterValues();
 });
 

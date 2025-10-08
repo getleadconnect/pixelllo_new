@@ -100,11 +100,14 @@ class HomeController extends Controller
         // Start with base query
         $auct = Auction::with(['category', 'bids']);
 
-        // Apply status filter
+        // Check if any filter is applied
+        $hasFilter = request('status') || (request('category') && request('category') != 'all') || request('search');
+
+        // Apply status filter only if explicitly provided
         if (request('status')) {
             switch(request('status')) {
-                case 'live':
-                    // Only active auctions
+                case 'active':
+                    // Only active auctions (not ending soon)
                     $auct->where('status', 'active')
                          ->where('endTime', '>', now());
                     break;
@@ -118,16 +121,21 @@ class HomeController extends Controller
                     // Upcoming auctions
                     $auct->where('status', 'upcoming');
                     break;
+                case 'ended':
+                    // Ended/closed auctions
+                    $auct->where(function($query) {
+                        $query->where('status', 'ended')
+                              ->orWhere('endTime', '<=', now());
+                    });
+                    break;
                 case 'all':
                 default:
-                    // Show all active auctions by default
-                    $auct->where('status', 'active');
+                    // Show all auctions (no status filter)
                     break;
             }
-        } else {
-            // Default to active auctions
-            $auct->where('status', 'active');
         }
+        // If no filter is applied, show all auctions by default
+        // No status restriction on first load
 
         // Apply category filter
         if (request('category') && request('category') != 'all') {
@@ -145,7 +153,7 @@ class HomeController extends Controller
             });
         }
 
-        // Apply sorting - MODIFIED TO PRIORITIZE ENDING SOON
+        // Apply sorting
         if(request('sort')) {
             switch(request('sort')) {
                 case 'price-low':
@@ -165,21 +173,25 @@ class HomeController extends Controller
                     break;
                 case 'ending-soon':
                 default:
-                    // Sort by ending soon first (using CASE to prioritize auctions ending within 24 hours)
+                    // Custom ordering for ending soon
                     $auct->orderByRaw("CASE
                         WHEN status = 'active' AND endTime > NOW() AND endTime <= DATE_ADD(NOW(), INTERVAL 24 HOUR) THEN 0
-                        WHEN status = 'active' THEN 1
-                        ELSE 2
+                        WHEN status = 'active' AND endTime > NOW() THEN 1
+                        WHEN status = 'upcoming' THEN 2
+                        WHEN status = 'ended' OR endTime <= NOW() THEN 3
+                        ELSE 4
                     END")
                     ->orderBy('endTime', 'ASC');
                     break;
             }
         } else {
-            // Default sorting - ending soon first, then other active auctions
+            // Default sorting: Active (ending soon first), Active, Upcoming, Ended
             $auct->orderByRaw("CASE
                 WHEN status = 'active' AND endTime > NOW() AND endTime <= DATE_ADD(NOW(), INTERVAL 24 HOUR) THEN 0
-                WHEN status = 'active' THEN 1
-                ELSE 2
+                WHEN status = 'active' AND endTime > NOW() THEN 1
+                WHEN status = 'upcoming' THEN 2
+                WHEN status = 'ended' OR endTime <= NOW() THEN 3
+                ELSE 4
             END")
             ->orderBy('featured', 'DESC')
             ->orderBy('endTime', 'ASC');
@@ -446,33 +458,59 @@ class HomeController extends Controller
         $timeLeft = '';
         $now = now();
 
-        // Override status based on endTime comparison
-        if ($auction->endTime && ($auction->endTime < $now)) {
-            $auction->status = 'ended';
+        // FIRST: Auto-update auction status based on current time
+        if ($auction->endTime && $auction->startTime) {
+            if ($now >= $auction->endTime) {
+                // Auction has ended
+                if ($auction->status !== 'ended') {
+                    $auction->status = 'ended';
+                    $auction->save();
+                }
 
-            // Check if auction has ended but no winner is set yet
-            if (!$auction->winner_id && $auction->bids->count() > 0) {
-                // Get the latest bid (first in the collection since it's ordered by created_at desc)
-                $latestBid = $auction->bids->first();
+                // Check if auction has ended but no winner is set yet
+                if (!$auction->winner_id && $auction->bids->count() > 0) {
+                    // Get the latest bid (first in the collection since it's ordered by created_at desc)
+                    $latestBid = $auction->bids->first();
 
-                // Update the auction with the winner
-                $auction->winner_id = $latestBid->user_id;
-                $auction->save();
+                    // Update the auction with the winner
+                    $auction->winner_id = $latestBid->user_id;
+                    $auction->save();
 
-                // Reload the auction with updated data
-                return redirect()->route('auction.detail', $auction->id);
+                    // Reload the auction with updated data
+                    return redirect()->route('auction.detail', $auction->id);
+                }
+            } elseif ($now >= $auction->startTime && $now < $auction->endTime) {
+                // Auction should be active
+                if ($auction->status !== 'active' && $auction->status !== 'ended') {
+                    $auction->status = 'active';
+                    $auction->save();
+                }
+            } elseif ($now < $auction->startTime) {
+                // Auction is upcoming
+                if ($auction->status !== 'upcoming') {
+                    $auction->status = 'upcoming';
+                    $auction->save();
+                }
             }
         }
 
-        // Calculate time remaining for active/upcoming auctions
+        // SECOND: Calculate time remaining and progress
         if ($auction->endTime && $auction->startTime) {
-            // Check if current time has exceeded end time
-            if ($now >= $auction->endTime) {
-                // Auction time has expired - show ENDED
-                $auction->status = 'ended';
+            // Calculate final end time with extension buffer
+            $finalEndTime = $auction->endTime->copy()->addSeconds($auction->extensionTime ?? 0);
+
+            // Calculate time remaining to endTime (for countdown display)
+            $secondsLeft = 0;
+            if ($now < $auction->endTime) {
+                $secondsLeft = $now->diffInSeconds($auction->endTime);
+            }
+
+            // Check if auction has truly ended: endTime + extensionTime < now() AND countdown == 0
+            if ($now >= $finalEndTime && $secondsLeft == 0) {
+                // Auction has truly ended (both conditions met)
                 $timeProgress = 100;
                 $timeLeft = 'ENDED';
-            } elseif ($now >= $auction->startTime && $now < $auction->endTime) {
+            } elseif ($now >= $auction->startTime && $now < $finalEndTime) {
                 // Auction is currently running - show countdown
                 // Calculate total duration from start to end
                 $totalDuration = $auction->startTime->diffInSeconds($auction->endTime);
@@ -485,12 +523,10 @@ class HomeController extends Controller
                     $timeProgress = min(100, max(0, ($elapsed / $totalDuration) * 100));
                 }
 
-                // Calculate time remaining (from now to endTime)
-                $secondsLeft = $now->diffInSeconds($auction->endTime);
+                // Use the calculated secondsLeft for time display
                 $timeLeft = $this->formatTimeRemaining($secondsLeft);
             } elseif ($now < $auction->startTime) {
                 // Auction hasn't started yet
-                $auction->status = 'upcoming';
                 $timeProgress = 0;
                 // Show countdown to start time
                 $secondsUntilStart = $now->diffInSeconds($auction->startTime);

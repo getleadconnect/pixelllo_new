@@ -335,7 +335,7 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse ($auctions as $auction)
+                @foreach ($auctions as $auction)
                     <tr>
                         <td>{{ $auction->id }}</td>
                         <td>
@@ -383,7 +383,7 @@
                                         </button>
                                     </form>
                                 @endif
-                                
+
                                 @if ($auction->status == 'upcoming')
                                     <form action="{{ url('/admin/auctions/' . $auction->id . '/status') }}" method="POST" style="display: inline;">
                                         @csrf
@@ -394,7 +394,7 @@
                                         </button>
                                     </form>
                                 @endif
-                                
+
                                 @if ($auction->status == 'active')
                                     <form action="{{ url('/admin/auctions/' . $auction->id . '/status') }}" method="POST" style="display: inline;">
                                         @csrf
@@ -405,7 +405,7 @@
                                         </button>
                                     </form>
                                 @endif
-                                
+
                                 @if ($auction->status != 'cancelled' && $auction->status != 'ended')
                                     <form action="{{ url('/admin/auctions/' . $auction->id . '/status') }}" method="POST" style="display: inline;">
                                         @csrf
@@ -420,11 +420,7 @@
 
                         </td>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="10" class="text-center">No auctions found</td>
-                    </tr>
-                @endforelse
+                @endforeach
             </tbody>
         </table>
     </div>
