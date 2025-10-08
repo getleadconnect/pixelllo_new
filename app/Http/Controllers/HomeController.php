@@ -540,11 +540,27 @@ class HomeController extends Controller
             $savingsPercentage = 100 - (($auction->currentPrice / $auction->retailPrice) * 100);
         }
 
-        // Get similar auctions from the same category (only active and not ended)
-        $similarAuctions = Auction::where('category_id', $auction->category_id)
-            ->where('id', '!=', $auction->id)
-            ->where('status', 'active')
-            ->where('endTime', '>', now()) // Exclude auctions that have ended
+        // Get similar auctions (active, ending soon, featured, upcoming) - from all categories
+        $now = now();
+        $similarAuctions = Auction::where('id', '!=', $auction->id)
+            ->where(function($query) use ($now) {
+                // Include: Active (not ended), Featured, or Upcoming auctions
+                $query->where(function($q) use ($now) {
+                    // Active auctions (not ended)
+                    $q->where('status', 'active')
+                      ->where('endTime', '>', $now);
+                })
+                ->orWhere('featured', true)  // Featured auctions
+                ->orWhere('status', 'upcoming');  // Upcoming auctions
+            })
+            ->orderByRaw("CASE
+                WHEN status = 'active' AND endTime > NOW() AND endTime <= DATE_ADD(NOW(), INTERVAL 24 HOUR) THEN 0
+                WHEN status = 'active' AND endTime > NOW() THEN 1
+                WHEN featured = 1 THEN 2
+                WHEN status = 'upcoming' THEN 3
+                ELSE 4
+            END")
+            ->orderBy('endTime', 'ASC')
             ->take(4)
             ->get();
 
