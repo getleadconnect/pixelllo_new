@@ -21,6 +21,63 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Recent Updates
 
+### October 8, 2025
+- **Admin Panel DataTable Fix**: Fixed DataTable error when no auctions exist in admin panel
+  - Changed `@forelse...@empty` to `@foreach` to prevent empty row with `colspan="10"` breaking DataTable initialization
+  - DataTable now properly handles empty state with built-in "No auctions found" message
+  - File: `resources/views/admin/auctions/index.blade.php`
+
+- **Auctions Listing Page Improvements**: Redesigned filter system and default display order
+  - **Default Display**: Shows ALL auctions (no filter applied on first load) in priority order:
+    - Priority 0: Active auctions ending within 24 hours (Ending Soon)
+    - Priority 1: Other active auctions
+    - Priority 2: Upcoming auctions
+    - Priority 3: Ended/closed auctions
+  - **Filter Options**: Active, Ending Soon, Upcoming, Ended/Closed
+  - **New Filter UI**: Search box on left, filter button on right with dropdown modal
+    - Filter dropdown contains: Category, Sort By, Status filters
+    - Apply Filters button to apply selections
+    - Reset button to clear all filters and show all auctions
+    - Active filter indicator (dot badge) on filter button
+    - Click outside to close dropdown
+  - **Filter Button Hover Fix**: Improved visibility with medium gray background (#e9ecef) and darker border
+  - File: `app/Http/Controllers/HomeController.php`, `resources/views/auctions.blade.php`
+
+- **Auction Detail Page - Auto-Status Updates**: Fixed auction status not updating based on current time
+  - Auction status now auto-updates when viewing detail page:
+    - If `now >= endTime + extensionTime`: Set status to `'ended'`
+    - If `now >= startTime AND now < endTime + extensionTime`: Set status to `'active'`
+    - If `now < startTime`: Set status to `'upcoming'`
+  - **Auction End Logic**: Shows "ENDED" only when BOTH conditions met:
+    - Condition 1: `endTime + extensionTime < now()`
+    - Condition 2: `countdown seconds == 0`
+  - Prevents premature "ended" display during extension buffer period
+  - Fixed issue where upcoming auctions showed "starts on..." message even after start time passed
+  - File: `app/Http/Controllers/HomeController.php:auctionDetail()`
+
+- **Similar Auctions Section Enhancements**: Improved display and filtering
+  - **Removed Category Restriction**: Shows auctions from ALL categories (not just same category)
+  - **Exclude Ended Auctions**: Only shows active, featured, and upcoming auctions
+    - Added checks: `status != 'ended'` AND `endTime > now()`
+  - **Display Start/End Times**: Added time display box showing:
+    - Start time and end time in format "M d, h:i A" (e.g., "Oct 08, 02:35 PM")
+    - Label: "Time:" with single line showing "Start - End"
+  - **Fixed Image Sizes**: All auction images constant height (220px) with `object-fit: cover`
+  - **Proper Spacing**: 25px gap between cards, 60px section margin-top
+  - **Responsive Grid**:
+    - Desktop (>1200px): 4 columns
+    - Tablet (992px-1200px): 3 columns
+    - Small Tablet (768px-992px): 2 columns
+    - Mobile (<768px): 1 column
+  - **Enhanced Styling**:
+    - Card hover effects (lift and shadow)
+    - Image zoom on hover
+    - Progress bar with gradient
+    - Time display in light gray box (#f8f9fa)
+    - Yellow underline on "Similar Auctions" heading (#ffdd00)
+    - Orange current bid price (#e9922b)
+  - Files: `app/Http/Controllers/HomeController.php`, `resources/views/auction-detail.blade.php`
+
 ### October 7, 2025
 - **Automatic Bidding System**: Implemented automatic bidding functionality on auction detail page
   - Users can set auto-bids with a maximum bid count (`max_bids` in `auto_bids` table)

@@ -38,8 +38,11 @@ class StripeController extends Controller
 
         // Calculate prices (assuming package price is in dollars)
         $subtotal = $package->price;
-        $tax = $subtotal * 0.08; // 8% tax
-        $total = $subtotal + $tax;
+        //$tax = $subtotal * 0.08; // 8% tax
+        //$total = $subtotal + $tax;
+
+        $total = $subtotal;
+
 
         try {
             // Check if Stripe is configured
@@ -56,7 +59,7 @@ class StripeController extends Controller
                 'payment_method_types' => ['card'],
                 'line_items' => [[
                     'price_data' => [
-                        'currency' => 'usd',
+                        'currency' => 'AED',
                         'product_data' => [
                             'name' => $package->name,
                             'description' => $package->bidAmount . ' Bid Credits',
