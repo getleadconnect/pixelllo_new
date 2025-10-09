@@ -90,13 +90,13 @@
                     
                     <div class="form-group">
                         <label for="startTime">Start Time <span style="color: red;">*</span></label>
-                        <input type="datetime-local" name="startTime" id="startTime" class="form-control" value="{{ old('startTime', now()->format('Y-m-d\Th:i')) }}" required>
+                        <input type="datetime-local" name="startTime" id="startTime" class="form-control" value="{{ old('startTime', now()->format('Y-m-d\TH:i')) }}" required>
                         <small class="form-text text-muted">Timezone: {{ config('app.timezone') }}</small>
                     </div>
 
                     <div class="form-group">
                         <label for="endTime">End Time <span style="color: red;">*</span></label>
-                        <input type="datetime-local" name="endTime" id="endTime" class="form-control" value="{{ old('endTime', now()->addDay()->format('Y-m-d\Th:i')) }}" required>
+                        <input type="datetime-local" name="endTime" id="endTime" class="form-control" value="{{ old('endTime', now()->addDay()->format('Y-m-d\TH:i')) }}" required>
                         <small class="form-text text-muted">Timezone: {{ config('app.timezone') }}</small>
                     </div>
                     
