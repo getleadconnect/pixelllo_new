@@ -66,7 +66,7 @@
                 <div>
                     <h4 style="margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
                         <span>Pricing & Timing</span>
-                        <span id="dubai-clock" style="font-size: 14px; font-weight: normal; color: #666;">
+                        <span id="dubai-clock" style="font-size: 14px; font-weight: normal; color: #0c71e2;">
                             <i class="fas fa-clock"></i> Loading...
                         </span>
                     </h4>
