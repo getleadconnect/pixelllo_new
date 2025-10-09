@@ -1268,28 +1268,38 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to initialize and run the countdown timer
     function initializeCountdownTimer() {
         @if($auction->status === 'active' && $auction->endTime > now())
-            // Parse auction end time (use ISO format for better compatibility)
+            // Parse auction times (ISO format for better compatibility)
             const endTime = new Date("{{ $auction->endTime->toIso8601String() }}").getTime();
             const startTime = new Date("{{ $auction->startTime->toIso8601String() }}").getTime();
+            const extensionTime = {{ $auction->extensionTime ?? 0 }}; // Extension time in seconds
+            const bidsAfterEndTime = {{ $bidsAfterEndTime ?? 0 }}; // Number of bids placed after original endTime
+
+            // Calculate final end time dynamically:
+            // finalEndTime = endTime + (extensionTime * bidsAfterEndTime)
+            // This matches the backend calculation and keeps endTime unchanged
+            const finalEndTime = endTime + (extensionTime * bidsAfterEndTime * 1000); // Convert to milliseconds
             const totalDuration = endTime - startTime;
             let auctionEndAlertShown = false; // Flag to prevent repeated alerts
 
-            console.log('Countdown Timer Debug:');
-            console.log('End Time:', new Date(endTime));
+            console.log('Countdown Timer Initialized:');
+            console.log('Original End Time:', new Date(endTime));
+            console.log('Extension Time:', extensionTime, 'seconds');
+            console.log('Bids After End Time:', bidsAfterEndTime);
+            console.log('Final End Time:', new Date(finalEndTime));
             console.log('Start Time:', new Date(startTime));
-            console.log('Current Time:', new Date());
-            console.log('Time Remaining (ms):', endTime - new Date().getTime());
 
             // Update the timer every second
             const timerInterval = setInterval(function() {
                 // Get current time
                 const now = new Date().getTime();
 
-                // Calculate remaining time
-                const distance = endTime - now;
+                // Calculate time remaining to finalEndTime
+                const distance = Math.max(0, finalEndTime - now);
+                const secondsRemaining = Math.floor(distance / 1000);
 
-                // If auction has ended
-                if (distance < 0) {
+                // Check if auction has ended (time has passed finalEndTime)
+                if (now >= finalEndTime || secondsRemaining === 0) {
+                    // AUCTION ENDED
                     clearInterval(timerInterval);
                     countdownElement.textContent = "ENDED";
                     countdownElement.classList.add('urgent');
@@ -1305,7 +1315,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (!auctionEndAlertShown) {
                         auctionEndAlertShown = true;
 
-                        // Show custom message using SweetAlert2 if available, otherwise use alert
+                        // Show custom message using SweetAlert2 if available
                         if (typeof Swal !== 'undefined') {
                             Swal.fire({
                                 title: 'Auction Ended',

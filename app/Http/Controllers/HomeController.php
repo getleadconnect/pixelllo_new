@@ -453,84 +453,77 @@ class HomeController extends Controller
         // Get the recent bidders (limit to 10)
         $recentBidders = $auction->bids->take(10);
 
-        // Calculate percentage of time elapsed
+        // Initialize time variables
         $timeProgress = 0;
         $timeLeft = '';
         $now = now();
 
-        // FIRST: Auto-update auction status based on current time
+        // Calculate time remaining and auction status
         if ($auction->endTime && $auction->startTime) {
-            if ($now >= $auction->endTime) {
-                // Auction has ended
+            // Calculate final end time dynamically:
+            // Count how many bids were placed after original endTime
+            // Each bid after endTime extends the auction by extensionTime seconds
+            $extensionSeconds = $auction->extensionTime ?? 0;
+            $originalEndTime = $auction->endTime;
+
+            // Count bids placed after original endTime
+            $bidsAfterEndTime = $auction->bids()
+                ->where('created_at', '>=', $originalEndTime)
+                ->count();
+
+            // Calculate final end time: endTime + (extensionTime * bidsAfterEndTime)
+            $finalEndTime = $originalEndTime->copy()->addSeconds($extensionSeconds * $bidsAfterEndTime);
+
+            // Calculate seconds remaining to finalEndTime (for countdown display)
+            $secondsToFinalEndTime = max(0, $finalEndTime->diffInSeconds($now, false));
+
+            // Check if auction has ended:
+            // The auction ends when current time >= finalEndTime
+            if ($now >= $finalEndTime) {
+                // AUCTION ENDED
+                $timeProgress = 100;
+                $timeLeft = 'ENDED';
+
+                // Update auction status to ended
                 if ($auction->status !== 'ended') {
                     $auction->status = 'ended';
                     $auction->save();
                 }
 
-                // Check if auction has ended but no winner is set yet
+                // Auto-assign winner if not set
                 if (!$auction->winner_id && $auction->bids->count() > 0) {
-                    // Get the latest bid (first in the collection since it's ordered by created_at desc)
                     $latestBid = $auction->bids->first();
-
-                    // Update the auction with the winner
                     $auction->winner_id = $latestBid->user_id;
-                    $auction->save();
-
-                    // Reload the auction with updated data
-                    return redirect()->route('auction.detail', $auction->id);
-                }
-            } elseif ($now >= $auction->startTime && $now < $auction->endTime) {
-                // Auction should be active
-                if ($auction->status !== 'active' && $auction->status !== 'ended') {
-                    $auction->status = 'active';
                     $auction->save();
                 }
             } elseif ($now < $auction->startTime) {
-                // Auction is upcoming
+                // UPCOMING - Auction hasn't started yet
+                $timeProgress = 0;
+                $secondsUntilStart = $now->diffInSeconds($auction->startTime);
+                $timeLeft = 'Starts in ' . $this->formatTimeRemaining($secondsUntilStart);
+
                 if ($auction->status !== 'upcoming') {
                     $auction->status = 'upcoming';
                     $auction->save();
                 }
-            }
-        }
-
-        // SECOND: Calculate time remaining and progress
-        if ($auction->endTime && $auction->startTime) {
-            // Calculate final end time with extension buffer
-            $finalEndTime = $auction->endTime->copy()->addSeconds($auction->extensionTime ?? 0);
-
-            // Calculate time remaining to endTime (for countdown display)
-            $secondsLeft = 0;
-            if ($now < $auction->endTime) {
-                $secondsLeft = $now->diffInSeconds($auction->endTime);
-            }
-
-            // Check if auction has truly ended: endTime + extensionTime < now() AND countdown == 0
-            if ($now >= $finalEndTime && $secondsLeft == 0) {
-                // Auction has truly ended (both conditions met)
-                $timeProgress = 100;
-                $timeLeft = 'ENDED';
-            } elseif ($now >= $auction->startTime && $now < $finalEndTime) {
-                // Auction is currently running - show countdown
-                // Calculate total duration from start to end
-                $totalDuration = $auction->startTime->diffInSeconds($auction->endTime);
-
-                // Calculate elapsed time from start to now
+            } else {
+                // ACTIVE - Auction is running
+                // Calculate progress bar (based on original duration)
+                $totalDuration = $auction->startTime->diffInSeconds($originalEndTime);
                 $elapsed = $auction->startTime->diffInSeconds($now);
 
-                // Calculate progress (0-100%)
                 if ($totalDuration > 0) {
                     $timeProgress = min(100, max(0, ($elapsed / $totalDuration) * 100));
                 }
 
-                // Use the calculated secondsLeft for time display
-                $timeLeft = $this->formatTimeRemaining($secondsLeft);
-            } elseif ($now < $auction->startTime) {
-                // Auction hasn't started yet
-                $timeProgress = 0;
-                // Show countdown to start time
-                $secondsUntilStart = $now->diffInSeconds($auction->startTime);
-                $timeLeft = 'Starts in ' . $this->formatTimeRemaining($secondsUntilStart);
+                // Show countdown to finalEndTime
+                $timeLeft = $this->formatTimeRemaining($secondsToFinalEndTime);
+
+                // Update auction status to active
+                if ($auction->status !== 'active' && $auction->status !== 'ended') {
+                    $auction->status = 'active';
+                    $auction->save();
+                }
             }
         }
 
@@ -580,7 +573,9 @@ class HomeController extends Controller
             'timeLeft',
             'savingsPercentage',
             'similarAuctions',
-            'autoBid'
+            'autoBid',
+            'bidsAfterEndTime',
+            'finalEndTime'
         ));
     }
 
@@ -677,8 +672,11 @@ class HomeController extends Controller
                 // Update auction price
                 $auction->currentPrice = $newPrice;
 
-                // Extend auction end time
-                $auction->endTime = Carbon::now()->addSeconds($auction->extensionTime);
+                // DO NOT modify endTime in database
+                // The final end time will be calculated dynamically as:
+                // finalEndTime = endTime + (extensionTime * number_of_bids_after_endTime)
+                // This keeps endTime constant and makes calculations predictable
+
                 $auction->save();
 
                 // Create bid record

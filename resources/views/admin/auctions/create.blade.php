@@ -64,7 +64,12 @@
                 
                 <!-- Pricing and Timing Section -->
                 <div>
-                    <h4 style="margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">Pricing & Timing</h4>
+                    <h4 style="margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                        <span>Pricing & Timing</span>
+                        <span id="dubai-clock" style="font-size: 14px; font-weight: normal; color: #666;">
+                            <i class="fas fa-clock"></i> Loading...
+                        </span>
+                    </h4>
                     
                     <div class="form-group">
                         <label for="startingPrice">Starting Price (AED) <span style="color: red;">*</span></label>
@@ -85,12 +90,14 @@
                     
                     <div class="form-group">
                         <label for="startTime">Start Time <span style="color: red;">*</span></label>
-                        <input type="datetime-local" name="startTime" id="startTime" class="form-control" value="{{ old('startTime') }}" required>
+                        <input type="datetime-local" name="startTime" id="startTime" class="form-control" value="{{ old('startTime', now()->format('Y-m-d\Th:i')) }}" required>
+                        <small class="form-text text-muted">Timezone: {{ config('app.timezone') }}</small>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="endTime">End Time <span style="color: red;">*</span></label>
-                        <input type="datetime-local" name="endTime" id="endTime" class="form-control" value="{{ old('endTime') }}" required>
+                        <input type="datetime-local" name="endTime" id="endTime" class="form-control" value="{{ old('endTime', now()->addDay()->format('Y-m-d\Th:i')) }}" required>
+                        <small class="form-text text-muted">Timezone: {{ config('app.timezone') }}</small>
                     </div>
                     
                     <div class="form-group">
@@ -121,47 +128,36 @@
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Set default start and end times in Asia/Dubai timezone
         const startTime = document.getElementById('startTime');
         const endTime = document.getElementById('endTime');
+        const dubaiClockElement = document.getElementById('dubai-clock');
 
-        if (!startTime.value) {
-            // Get current time in Asia/Dubai timezone
+        // Function to update Dubai clock
+        function updateDubaiClock() {
             const now = new Date();
 
-            // Convert to Asia/Dubai timezone (UTC+4)
-            const dubaiOffset = 4 * 60; // Dubai is UTC+4 (in minutes)
-            const localOffset = now.getTimezoneOffset(); // Browser's offset from UTC (in minutes)
-            const totalOffset = dubaiOffset + localOffset;
+            // Format time for Asia/Dubai timezone (UTC+4)
+            const dubaiTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Dubai' }));
 
-            // Adjust time to Dubai timezone
-            const dubaiTime = new Date(now.getTime() + (totalOffset * 60 * 1000));
+            const options = {
+                timeZone: 'Asia/Dubai',
+                year: 'numeric',
+                month: 'short',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            };
 
-            // Round to next hour
-            dubaiTime.setHours(dubaiTime.getHours() + 1);
-            dubaiTime.setMinutes(0);
-            dubaiTime.setSeconds(0);
-            dubaiTime.setMilliseconds(0);
+            const formattedTime = new Intl.DateTimeFormat('en-US', options).format(now);
 
-            // Format for datetime-local input (YYYY-MM-DDTHH:mm)
-            const year = dubaiTime.getFullYear();
-            const month = String(dubaiTime.getMonth() + 1).padStart(2, '0');
-            const day = String(dubaiTime.getDate()).padStart(2, '0');
-            const hours = String(dubaiTime.getHours()).padStart(2, '0');
-            const minutes = String(dubaiTime.getMinutes()).padStart(2, '0');
-
-            startTime.value = `${year}-${month}-${day}T${hours}:${minutes}`;
-
-            // Set end time to 24 hours after start time
-            const endDubaiTime = new Date(dubaiTime.getTime() + (24 * 60 * 60 * 1000));
-            const endYear = endDubaiTime.getFullYear();
-            const endMonth = String(endDubaiTime.getMonth() + 1).padStart(2, '0');
-            const endDay = String(endDubaiTime.getDate()).padStart(2, '0');
-            const endHours = String(endDubaiTime.getHours()).padStart(2, '0');
-            const endMinutes = String(endDubaiTime.getMinutes()).padStart(2, '0');
-
-            endTime.value = `${endYear}-${endMonth}-${endDay}T${endHours}:${endMinutes}`;
+            dubaiClockElement.innerHTML = '<i class="fas fa-clock"></i> Dubai: ' + formattedTime;
         }
+
+        // Update clock immediately and then every second
+        updateDubaiClock();
+        setInterval(updateDubaiClock, 1000);
 
         // Validate end time is after start time
         endTime.addEventListener('change', function() {
@@ -174,11 +170,12 @@
             }
         });
 
+        // Auto-update end time when start time changes
         startTime.addEventListener('change', function() {
             const start = new Date(startTime.value);
             const end = new Date(endTime.value);
 
-            if (end <= start) {
+            if (end <= start || !endTime.value) {
                 // Set end time to 24 hours after start time
                 const newEnd = new Date(start.getTime() + (24 * 60 * 60 * 1000));
                 const year = newEnd.getFullYear();
