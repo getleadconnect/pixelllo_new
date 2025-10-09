@@ -99,7 +99,7 @@ class AdminAuctionController extends Controller
             'bidIncrement' => 'required|numeric|min:0.01',
             'retailPrice' => 'required|numeric|min:0',
             'category_id' => 'required|exists:categories,id',
-            'startTime' => 'required|date|after:now',
+            'startTime' => 'required|date',
             'endTime' => 'required|date|after:startTime',
             'extensionTime' => 'required|integer|min:0',
             'featured' => 'boolean',
