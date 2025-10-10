@@ -1441,7 +1441,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         priceValue.classList.add('price-update-animation');
 
                         // Update price display without reloading
-                        priceValue.textContent = '$' + parseFloat(data.data.auction.currentPrice).toFixed(2);
+                        priceValue.textContent = 'AED ' + parseFloat(data.data.auction.currentPrice).toFixed(2);
 
                         // Update bid counter
                         const bidCounter = document.querySelector('.bid-stats .stat:first-child .stat-value');
@@ -1488,8 +1488,24 @@ document.addEventListener('DOMContentLoaded', function() {
                             // Handle specific errors
                             if (error.status === 403) {
                                 if (errorData.message === 'Insufficient bid credits') {
-                                    alert('You do not have enough bid credits. Please purchase more bids to continue.');
-                                    window.location.href = '{{ url('/dashboard/bids/purchase') }}';
+                                    // Show SweetAlert2 with redirect to buy bids page
+                                    if (typeof Swal !== 'undefined') {
+                                        Swal.fire({
+                                            title: 'Insufficient Bid Balance',
+                                            text: 'Insufficient bid balance, Please purchase Bid Credits to continue bids.',
+                                            icon: 'warning',
+                                            confirmButtonText: 'OK',
+                                            confirmButtonColor: '#ff5500',
+                                            allowOutsideClick: false
+                                        }).then((result) => {
+                                            if (result.isConfirmed) {
+                                                window.location.href = '{{ route("dashboard.buy-bids") }}';
+                                            }
+                                        });
+                                    } else {
+                                        alert('Insufficient bid balance, Please purchase Bid Credits to continue bids.');
+                                        window.location.href = '{{ route("dashboard.buy-bids") }}';
+                                    }
                                 } else {
                                     alert(errorData.message || 'You are not authorized to place this bid.');
                                 }
@@ -1573,7 +1589,37 @@ document.addEventListener('DOMContentLoaded', function() {
 
                         try {
                             const errorData = await error.json();
-                            alert(errorData.message || 'Error setting up auto-bidder. Please try again.');
+
+                            // Check if error is about insufficient bid credits
+                            if (errorData.message && errorData.message.includes('Insufficient bid credits')) {
+                                // Show SweetAlert2 with two buttons: Cancel and Buy Credits
+                                if (typeof Swal !== 'undefined') {
+                                    Swal.fire({
+                                        title: 'Insufficient Bid Credits',
+                                        text: errorData.message,
+                                        icon: 'warning',
+                                        showCancelButton: true,
+                                        confirmButtonText: 'Buy Credits',
+                                        cancelButtonText: 'Cancel',
+                                        confirmButtonColor: '#ff5500',
+                                        cancelButtonColor: '#6c757d',
+                                        allowOutsideClick: false
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            // Redirect to buy bids page
+                                            window.location.href = '{{ route("dashboard.buy-bids") }}';
+                                        }
+                                    });
+                                } else {
+                                    // Fallback if SweetAlert2 not loaded
+                                    if (confirm(errorData.message + '\n\nWould you like to buy more bid credits?')) {
+                                        window.location.href = '{{ route("dashboard.buy-bids") }}';
+                                    }
+                                }
+                            } else {
+                                // Other errors - show normal alert
+                                alert(errorData.message || 'Error setting up auto-bidder. Please try again.');
+                            }
                         } catch (e) {
                             alert('There was an error setting up the auto-bidder. Please try again.');
                         }
@@ -1620,7 +1666,7 @@ document.addEventListener('DOMContentLoaded', function() {
             bidItem.innerHTML = `
                 <div class="bidder-info">
                     <span class="bidder-name">${maskedName}</span>
-                    <span class="bid-price">$${parseFloat(bid.amount).toFixed(2)}</span>
+                    <span class="bid-price">AED ${parseFloat(bid.amount).toFixed(2)}</span>
                 </div>
                 <div class="bid-time">just now</div>
             `;
@@ -1858,15 +1904,23 @@ $(document).ready(function() {
                         console.log('Auto-bid stopped - insufficient bid balance');
                     }
 
-                    // Show notification
+                    // Show notification with redirect
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
                             title: 'Auto-Bid Stopped',
-                            text: 'Your auto-bid has been stopped because you have no bid credits remaining. Please purchase more bids to continue.',
+                            text: 'Insufficient bid balance, please purchase bidcoin to continue bids.',
                             icon: 'warning',
                             confirmButtonText: 'OK',
-                            confirmButtonColor: '#ff5500'
+                            confirmButtonColor: '#ff5500',
+                            allowOutsideClick: false
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '{{ route("dashboard.buy-bids") }}';
+                            }
                         });
+                    } else {
+                        alert('Insufficient bid balance, please purchase bidcoin to continue bids.');
+                        window.location.href = '{{ route("dashboard.buy-bids") }}';
                     }
                 }
             } else if (data.has_auto_bid === false && data.auto_bid && !data.auto_bid.is_active) {

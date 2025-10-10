@@ -21,6 +21,47 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Recent Updates
 
+### October 9, 2025
+- **Auction Timer System Rewrite**: Completely rewrote auction countdown timer to keep `endTime` constant in database
+  - **Problem**: Previous implementation modified `endTime` in database after each bid, causing countdown to show incorrect values on page refresh
+  - **Solution**: Implemented dynamic calculation of final end time without modifying database
+  - **Backend Changes** (`app/Http/Controllers/HomeController.php`):
+    - Removed `endTime` modification in `placeBid()` method (line 667-672)
+    - Added dynamic calculation: `finalEndTime = endTime + (extensionTime * bidsAfterEndTime)`
+    - Counts bids placed after original `endTime` to calculate extension
+    - Auction ends when: `now >= finalEndTime`
+    - Automatically stores `winner_id` (latest bidder's user_id) when auction ends
+    - Sets auction `status = 'ended'` when time expires
+  - **Frontend Changes** (`resources/views/auction-detail.blade.php`):
+    - Receives `bidsAfterEndTime` count from backend
+    - Calculates `finalEndTime` using same formula as backend
+    - Shows "ENDED" instead of "0s" when countdown reaches zero
+    - Displays SweetAlert2 notification and auto-refreshes page when auction ends
+  - **Key Formula**: `finalEndTime = endTime + (extensionTime × bidsAfterEndTime)`
+  - **Benefits**:
+    - `endTime` value in database never changes (predictable, consistent)
+    - Correct countdown display on every page refresh
+    - Proper winner assignment when auction ends
+    - No more "0s" display - shows "ENDED" immediately
+  - Files: `app/Http/Controllers/HomeController.php`, `resources/views/auction-detail.blade.php`
+
+- **Admin Auction Create Page Enhancements**: Improved datetime fields and timezone display
+  - **Default DateTime Values**: Start time and end time fields now pre-filled with current date/time
+    - Start Time: Current time in configured timezone (`now()->format('Y-m-d\TH:i')`)
+    - End Time: 24 hours from now (`now()->addDay()->format('Y-m-d\TH:i')`)
+    - Timezone indicator: Shows configured timezone below each field (e.g., "Timezone: Asia/Kolkata")
+  - **Real-Time Dubai Clock**: Added live clock display in "Pricing & Timing" section header
+    - Shows current Asia/Dubai time in real-time (updates every second)
+    - Format: "Dubai: Oct 09, 2025, 02:30:45 PM"
+    - Uses browser's `Intl.DateTimeFormat` with `timeZone: 'Asia/Dubai'`
+    - Displayed on right side of section heading with clock icon
+  - **Removed Start Time Validation**: Removed `after:now` validation rule from auction creation
+    - Allows creating auctions with any start time (past, present, or future)
+    - No longer shows "The start time field must be a date after now" error
+    - Validation remains: End time must be after start time
+    - Enables backdating auctions or scheduling far in advance
+  - Files: `resources/views/admin/auctions/create.blade.php`, `app/Http/Controllers/Admin/AdminAuctionController.php`
+
 ### October 8, 2025
 - **Admin Panel DataTable Fix**: Fixed DataTable error when no auctions exist in admin panel
   - Changed `@forelse...@empty` to `@foreach` to prevent empty row with `colspan="10"` breaking DataTable initialization
