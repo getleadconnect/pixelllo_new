@@ -21,6 +21,34 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Recent Updates
 
+### October 10, 2025
+- **Bid Balance Validation Improvements**: Enhanced error handling for insufficient bid balance scenarios
+  - **Manual Bid Error Handling** (`resources/views/auction-detail.blade.php` lines 1490-1508):
+    - When user tries to place manual bid with insufficient credits
+    - Shows SweetAlert2 dialog: "Insufficient Bid Balance"
+    - Message: "Insufficient bid balance, Please purchase Bid Credits to continue bids."
+    - Single "OK" button redirects to bid package page (`route('dashboard.buy-bids')`)
+    - Fallback to plain JavaScript alert if SweetAlert2 not loaded
+  - **Auto-Bid Stopped Notification** (`resources/views/auction-detail.blade.php` lines 1877-1894):
+    - When auto-bid runs out of credits during auction
+    - Shows SweetAlert2 dialog: "Auto-Bid Stopped"
+    - Same message and redirect behavior as manual bid error
+    - Stops auto-bid interval checking when triggered
+  - **Auto-Bid Setup Validation** (`resources/views/auction-detail.blade.php` lines 1585-1626):
+    - When user tries to set up auto-bid with insufficient credits (e.g., needs 10 but has 5)
+    - Backend error: "Insufficient bid credits. You need at least X bid credits to set up auto-bidding with this configuration." (from `HomeController.php` line 766)
+    - Shows SweetAlert2 dialog with **TWO buttons**:
+      - **"Buy Credits"** button (orange #ff5500) - Redirects to bid package page
+      - **"Cancel"** button (gray #6c757d) - Dismisses dialog
+    - Error message detection: checks if error includes "Insufficient bid credits"
+    - Fallback: Native `confirm()` dialog if SweetAlert2 not loaded
+  - **User Experience Benefits**:
+    - Clear, professional error messages with consistent styling
+    - Automatic redirect to purchase page for quick resolution
+    - No dead-ends - users always have path forward
+    - Prevents confusion about why bid/auto-bid failed
+  - File: `resources/views/auction-detail.blade.php`
+
 ### October 9, 2025
 - **Auction Timer System Rewrite**: Completely rewrote auction countdown timer to keep `endTime` constant in database
   - **Problem**: Previous implementation modified `endTime` in database after each bid, causing countdown to show incorrect values on page refresh

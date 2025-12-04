@@ -58,17 +58,17 @@
                             <div class="bid-package">
                                 <h4>Starter</h4>
                                 <div class="bid-amount">25 Bids</div>
-                                <div class="package-price">$15</div>
+                                <div class="package-price">AED 15</div>
                             </div>
                             <div class="bid-package">
                                 <h4>Popular</h4>
                                 <div class="bid-amount">100 Bids</div>
-                                <div class="package-price">$50</div>
+                                <div class="package-price">AED 50</div>
                             </div>
                             <div class="bid-package">
                                 <h4>Premium</h4>
                                 <div class="bid-amount">250 Bids</div>
-                                <div class="package-price">$100</div>
+                                <div class="package-price">AED 100</div>
                             </div>
                         </div>
                     </div>
@@ -112,18 +112,18 @@
                             <div class="saving-example">
                                 <div class="item-name">MacBook Pro</div>
                                 <div class="price-comparison">
-                                    <span class="retail">$1,999</span>
+                                    <span class="retail">AED 1,999</span>
                                     <span class="vs">vs</span>
-                                    <span class="final">$26.45</span>
+                                    <span class="final">AED 26.45</span>
                                 </div>
                                 <div class="savings-percent">99% SAVINGS</div>
                             </div>
                             <div class="saving-example">
                                 <div class="item-name">iPhone 14 Pro</div>
                                 <div class="price-comparison">
-                                    <span class="retail">$1,099</span>
+                                    <span class="retail">AED 1,099</span>
                                     <span class="vs">vs</span>
-                                    <span class="final">$18.76</span>
+                                    <span class="final">AED 18.76</span>
                                 </div>
                                 <div class="savings-percent">98% SAVINGS</div>
                             </div>
@@ -276,11 +276,11 @@
                         </div>
                     </div>
                     <div class="testimonial-content">
-                        <p>"I was skeptical at first, but after winning a MacBook Pro for just $33, I'm completely hooked! The bidding process is exciting, and the savings are incredible. Pixelllo has become my go-to for electronics."</p>
+                        <p>"I was skeptical at first, but after winning a MacBook Pro for just AED 33, I'm completely hooked! The bidding process is exciting, and the savings are incredible. Pixelllo has become my go-to for electronics."</p>
                     </div>
                     <div class="testimonial-winnings">
                         <div class="winning-item">MacBook Pro 14"</div>
-                        <div class="winning-price">Won for $33.47</div>
+                        <div class="winning-price">Won for AED 33.47</div>
                         <div class="winning-saving">Saved 98%</div>
                     </div>
                 </div>
@@ -307,7 +307,7 @@
                     </div>
                     <div class="testimonial-winnings">
                         <div class="winning-item">Sony PlayStation 5</div>
-                        <div class="winning-price">Won for $22.18</div>
+                        <div class="winning-price">Won for AED 22.18</div>
                         <div class="winning-saving">Saved 96%</div>
                     </div>
                 </div>
@@ -334,7 +334,7 @@
                     </div>
                     <div class="testimonial-winnings">
                         <div class="winning-item">Diamond Pendant</div>
-                        <div class="winning-price">Won for $28.75</div>
+                        <div class="winning-price">Won for AED 28.75</div>
                         <div class="winning-saving">Saved 99%</div>
                     </div>
                 </div>
