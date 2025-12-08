@@ -15,7 +15,7 @@
         <div class="intro-section">
             <div class="intro-content">
                 <h2>What is a Penny Auction?</h2>
-                <p>Penny auctions are a type of auction where each bid increases the price by a small fixed amount (often just $0.01) and extends the auction timer. When the timer reaches zero, the last person to place a bid wins the item at the final price, which is typically a fraction of the retail value.</p>
+                <p>Penny auctions are a type of auction where each bid increases the price by a small fixed amount (often just AED 0.01) and extends the auction timer. When the timer reaches zero, the last person to place a bid wins the item at the final price, which is typically a fraction of the retail value.</p>
                 <p>Pixelllo offers an exciting opportunity to win high-end products at incredible discounts. Our auctions are transparent, fair, and designed to create an engaging experience for all participants.</p>
             </div>
             <div class="intro-video">
@@ -55,12 +55,17 @@
                             <img src="{{ asset('images/steps/purchase-bids.jpg') }}" alt="Purchase Bids" onerror="this.src='https://images.unsplash.com/photo-1601597111158-2fceff292cdc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80'">
                         </div>
                         <div class="bid-packages-preview">
+
+                        @foreach($bidPackages as $bp)
+
                             <div class="bid-package">
-                                <h4>Starter</h4>
-                                <div class="bid-amount">25 Bids</div>
-                                <div class="package-price">AED 15</div>
+                                <h4>{{$bp->name}}</h4>
+                                <div class="bid-amount">{{$bp->bidAmount}} Bids</div>
+                                <div class="package-price">AED {{$bp->price}}</div>
                             </div>
-                            <div class="bid-package">
+
+                        @endforeach
+                            <!--<div class="bid-package">
                                 <h4>Popular</h4>
                                 <div class="bid-amount">100 Bids</div>
                                 <div class="package-price">AED 50</div>
@@ -69,7 +74,7 @@
                                 <h4>Premium</h4>
                                 <div class="bid-amount">250 Bids</div>
                                 <div class="package-price">AED 100</div>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>

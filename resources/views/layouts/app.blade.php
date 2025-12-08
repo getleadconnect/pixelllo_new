@@ -19,6 +19,10 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
 
+    <link rel="apple-touch-icon" sizes="180x180" href="{{url('/images/favicons/apple-touch-icon.png')}}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{url('/images/favicons/favicon-32x32.png')}}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{url('/images/favicons/favicon-16x16.png')}}">
+    
     <!-- Styles -->
     <style>
         :root {
@@ -669,7 +673,8 @@
     <header class="header">
         <div class="container">
             <div class="header-content">
-                <a href="{{ url('/') }}" class="logo">Pixelllo</a>
+                <a href="{{ url('/') }}" class="logo">
+                    <img src="{{url('/images/pixelllo_logo.png')}}" style="width:150px;"></a>
 
                 <!-- Mobile Menu Toggle Button -->
                 <button class="mobile-menu-toggle" id="mobileMenuToggle">

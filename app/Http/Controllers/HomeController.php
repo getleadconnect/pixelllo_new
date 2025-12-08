@@ -6,6 +6,7 @@ use App\Models\Auction;
 use App\Models\Bid;
 use App\Models\AutoBid;
 use App\Models\User;
+use App\Models\BidPackage;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -246,7 +247,8 @@ class HomeController extends Controller
      */
     public function howItWorks()
     {
-        return view('how-it-works');
+        $bidPackages=BidPackage::where('isActive',1)->get();
+        return view('how-it-works', compact('bidPackages'));
     }
 
     /**
