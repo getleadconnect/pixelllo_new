@@ -1180,7 +1180,7 @@
                             } elseif ($startTime->isTomorrow()) {
                                 $startTimeMessage .= 'tomorrow at ' . $startTime->format('g:i A');
                             } else {
-                                $startTimeMessage .= 'in ' . now()->diffInDays($startTime) . ' days';
+                                $startTimeMessage .= 'in ' . round(now()->diffInDays($startTime),0) . ' days';
                             }
                         @endphp
                         <div class="auction-card">
