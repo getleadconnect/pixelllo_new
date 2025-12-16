@@ -658,6 +658,17 @@
                 margin-right: 1rem;
             }
         }
+
+
+.svg-icon path {
+  fill: white;
+  transition: fill 0.3s ease;
+}
+
+.svg-icon:hover path {
+  fill: black;
+}
+
     </style>
 
     <!-- Dashboard Styles -->
@@ -768,7 +779,9 @@
                         <p class="footer-description">The ultimate penny auction platform where you can win amazing products at a fraction of their retail price.</p>
                         <div class="social-links">
                             <a href="https://www.facebook.com/share/1AHDQtuy1h/?mibextid=wwXIfr" class="social-link" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                            <a href="https://x.com/pixelllo_?s=21" class="social-link" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                            <a href="https://x.com/pixelllo_?s=21" class="social-link svg-icon" aria-label="Twitter">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" style="width:16px;"><path fill="white" d="M357.2 48L427.8 48 273.6 224.2 455 464 313 464 201.7 318.6 74.5 464 3.8 464 168.7 275.5-5.2 48 140.4 48 240.9 180.9 357.2 48zM332.4 421.8l39.1 0-252.4-333.8-42 0 255.3 333.8z"/></svg>
+                            </a>
                             <a href="https://www.instagram.com/pixelllo_uae?igsh=MWxuYzl1MzR3OHh5&utm_source=qr" class="social-link" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
                             <!--<a href="#" class="social-link" aria-label="YouTube"><i class="fab fa-youtube"></i></a>-->
                         </div>
