@@ -21,6 +21,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Recent Updates
 
+### December 26, 2025
+- **CLAUDE.md Enhanced**: Comprehensive documentation created for AI code assistants
+  - Added complete technology stack details (Laravel 12.0, PHP 8.4+, Vite with ES modules)
+  - Documented all development commands including `composer dev` for concurrent services
+  - Added architecture patterns and service abstractions (DatabaseService for multi-DB support)
+  - Included custom features: penny auction system, auto-bidding, multi-currency
+  - Documented testing approach with PHPUnit 11.5.3 and SQLite in-memory
+  - Added deployment workflow with deploy.sh script
+  - Enhanced AI workflow instructions with structured phases
+
 ### October 10, 2025
 - **Bid Balance Validation Improvements**: Enhanced error handling for insufficient bid balance scenarios
   - **Manual Bid Error Handling** (`resources/views/auction-detail.blade.php` lines 1490-1508):
@@ -205,28 +215,30 @@ Pixelllo is an online auction platform built with Laravel that allows users to b
 ## Technology Stack
 
 ### Backend
-- **Laravel 12.14.1** - PHP web application framework (latest version)
+- **Laravel 12.0** - PHP web application framework (latest version as of Dec 2025)
 - **PHP 8.4+** - Server-side programming language (requires ^8.4)
 - **MySQL/PostgreSQL** - Database (supports both, check .env for current connection)
   - Production: PostgreSQL (Supabase hosted) with Row Level Security (RLS)
   - Development: MySQL (XAMPP local)
 - **Laravel Sanctum** - API authentication
-- **Eloquent ORM** - Database interactions
-- **Stripe** - Payment processing integration
+- **Eloquent ORM** - Database interactions with HasUuids trait for UUID primary keys
+- **Stripe PHP SDK v17.6** - Payment processing integration
 
 ### Frontend
 - **Blade Templates** - Laravel's templating engine
-- **Vite** - Asset bundling and compilation
-- **Tailwind CSS 4.0** - CSS framework
+- **Vite** - Asset bundling and compilation with ES modules support
+- **Tailwind CSS 4.0** - CSS framework using new Vite plugin (@tailwindcss/vite)
 - **JavaScript (ES6+)** - Client-side functionality
 - **Axios** - HTTP client for API requests
+- **SweetAlert2** - Beautiful popup dialogs
 
 ### Development Tools
 - **Composer** - PHP dependency management
 - **NPM** - Node.js package management
-- **PHPUnit** - PHP testing framework
+- **PHPUnit 11.5.3** - PHP testing framework
 - **Laravel Pint** - Code formatting
 - **Laravel Pail** - Log monitoring
+- **Concurrently** - Running multiple dev services
 
 ## Common Development Commands
 
@@ -315,9 +327,15 @@ npm install                          # Install Node dependencies
 
 ### Key Models and Relationships
 - **User** - Authentication, bid balance, roles (user/admin)
+  - Has many: Bids, AutoBids, Orders, Reviews
 - **Auction** - Product auctions with bidding logic
+  - Belongs to: Category
+  - Has many: Bids
+  - Has one: Winner (User)
 - **Bid** - Individual bids placed by users
+  - Belongs to: User, Auction
 - **AutoBid** - Automated bidding functionality
+  - Tracks: max_bids, bids_left, is_active
 - **Order** - Purchase orders for won auctions
 - **BidPackage** - Purchasable bid credits
 - **Category** - Product categorization
@@ -335,7 +353,7 @@ npm install                          # Install Node dependencies
   - `pgsql` - Production (Supabase hosted)
 - Default fallback: `pgsql` (see `config/database.php:19`)
 - Testing: SQLite in-memory (see `phpunit.xml:25-26`)
-- Migrations in `database/migrations/`
+- Migrations in `database/migrations/` (30+ migration files)
 - Seeders in `database/seeders/`
 - **IPv6 Required**: Server must have IPv6 enabled for Supabase PostgreSQL connection
 - **Row Level Security**: PostgreSQL tables have RLS enabled with permissive policies for database owner
@@ -387,6 +405,13 @@ Log::info('Debug message', ['data' => $variable]);
 2. **Git Push**: Push changes to repository
 3. **Server Pull**: Pull changes on production server
 4. **Apply Updates**: Run deployment commands
+
+### Deployment Script
+The project includes a `deploy.sh` script that handles:
+- Composer optimization for production
+- Cache clearing workflow
+- Migration running with `--force`
+- Permission setting for storage/cache
 
 ### Post-Deployment Checklist
 ```bash
@@ -452,22 +477,34 @@ max_input_time = 120
 ## Application Structure
 
 ### Core Features
-- **Public Auction Pages** - Browse and bid on active auctions
+- **Penny Auction System**
+  - Users purchase bid packages
+  - Each bid increments auction price by `bidIncrement`
+  - Automatic time extension (`extensionTime`) when bids placed
+  - Dynamic end time calculation: `finalEndTime = endTime + (extensionTime × bidsAfterEndTime)`
+- **Auto-Bidding System**
+  - Set maximum bid counts via `/api/auctions/{id}/auto-bid-status`
+  - Automatic bid placement via 2-second AJAX polling
+  - Stops when credits/max bids reached
 - **User Dashboard** - Manage bids, wins, orders, and account settings
 - **Admin Panel** - Manage auctions, users, categories, and site settings
-- **Real-time Updates** - Live bidding and countdown timers
-- **Payment Processing** - Bid package purchases and auction payments
+- **Real-time Updates** - Live bidding with 3-second refresh and countdown timers
+- **Payment Processing** - Stripe integration for bid packages and payments
 
 ### Key Directories
 - `app/Http/Controllers/` - Request handling logic
   - `API/` - API endpoints for AJAX requests
   - `Admin/` - Admin panel controllers
+  - `HomeController` - Main auction functionality
+  - `DashboardController` - User dashboard features
 - `app/Models/` - Eloquent models with relationships
-- `app/Services/` - Business logic services (e.g., DatabaseService)
+- `app/Services/` - Business logic services
+  - `DatabaseService` - Multi-database abstraction layer
 - `resources/views/` - Blade templates
   - `admin/` - Admin panel views
   - `dashboard/` - User dashboard views
   - `components/` - Reusable components
+  - `layouts/` - Master templates
 - `routes/` - URL routing
   - `web.php` - Web routes
   - `api.php` - API routes
@@ -503,9 +540,10 @@ max_input_time = 120
 
 ### Test Organization
 - `tests/Unit/` - Unit tests for individual components
+  - Database compatibility tests for multi-DB support
 - `tests/Feature/` - Feature tests for complete workflows
-- Uses PHPUnit testing framework
-- SQLite in-memory database for testing isolation
+- Uses PHPUnit 11.5.3 testing framework
+- SQLite in-memory database (`:memory:`) for testing isolation
 
 ### Running Tests
 ```bash

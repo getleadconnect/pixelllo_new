@@ -101,6 +101,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the bid purchase histories for the user.
+     */
+    public function bidPurchaseHistories()
+    {
+        return $this->hasMany(BidPurchaseHistory::class);
+    }
+
+    /**
      * Check if user is an admin
      *
      * @return bool

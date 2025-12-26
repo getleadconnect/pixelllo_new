@@ -209,4 +209,27 @@ class StripeService
     {
         return isset($session['payment_status']) && $session['payment_status'] === 'paid';
     }
+
+    /**
+     * Retrieve a Payment Intent from Stripe
+     */
+    public function retrievePaymentIntent($paymentIntentId)
+    {
+        try {
+            $endpoint = "/payment_intents/{$paymentIntentId}";
+
+            $response = $this->makeStripeRequest('GET', $endpoint);
+
+            if ($response === false) {
+                throw new Exception('Failed to retrieve payment intent from Stripe');
+            }
+
+            return $response;
+        } catch (Exception $e) {
+            Log::error('Stripe retrievePaymentIntent error: ' . $e->getMessage(), [
+                'payment_intent_id' => $paymentIntentId
+            ]);
+            throw $e;
+        }
+    }
 }

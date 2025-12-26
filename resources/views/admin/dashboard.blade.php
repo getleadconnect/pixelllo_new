@@ -5,6 +5,11 @@
 @section('page-subtitle', 'Overview of site activity and statistics')
 
 @section('content')
+<style>
+.admin-card {
+    padding: 10px 20px !important;
+ }
+    </style>
 <!-- Stats Cards -->
 <div class="admin-cards">
     <!-- Users Card -->
@@ -46,16 +51,51 @@
         </div>
     </div>
     
-    <!-- Orders Card -->
+    <!-- Subscriptions Card -->
     <div class="admin-card">
         <div class="admin-card-inner">
             <div class="admin-card-icon orders">
                 <i class="fas fa-shopping-cart"></i>
             </div>
             <div class="admin-card-content">
-                <h3>{{ number_format($totalOrders ?? 0) }}</h3>
-                <p>Total Orders</p>
+                <h3>{{ number_format($totalSubscriptions ?? 0) }}</h3>
+                <p>Total Subscriptions</p>
             </div>
+        </div>
+    </div>
+    
+    <!-- Total Bids Purchased Card -->
+    <div class="admin-card">
+        <div class="admin-card-inner">
+            <div class="admin-card-icon purchased">
+                <i class="fas fa-coins"></i>
+            </div>
+            <div class="admin-card-content">
+                <h3>{{ number_format($totalBidsPurchased ?? 0) }}</h3>
+                <p>Total Bid Coins Purchased</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bid Purchase Analytics -->
+<div class="admin-data-card" style="margin-bottom: 20px;">
+    <div class="admin-data-card-header">
+        <div class="admin-data-card-title">Monthly Bid Coin Purchases</div>
+        <div class="admin-data-card-actions" style="display: flex; gap: 10px; align-items: center;">
+            <select id="bidPurchaseYear" class="form-control" style="width: auto;">
+                @for($year = now()->year; $year >= (now()->year - 5); $year--)
+                    <option value="{{ $year }}" {{ $year == $currentYear ? 'selected' : '' }}>{{ $year }}</option>
+                @endfor
+            </select>
+            <a href="{{ route('admin.bid-purchase-histories.index') }}" class="btn btn-sm btn-primary">
+                <i class="fas fa-list"></i> View All
+            </a>
+        </div>
+    </div>
+    <div class="admin-data-card-body">
+        <div class="chart-container">
+            <canvas id="bidPurchaseChart"></canvas>
         </div>
     </div>
 </div>
@@ -207,6 +247,89 @@
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Bid Purchase Chart Data (from server)
+        const initialBidPurchaseData = @json($monthlyBidPurchases);
+        
+        // Bid Purchase Bar Chart
+        const bidPurchaseCtx = document.getElementById('bidPurchaseChart').getContext('2d');
+        const bidPurchaseChart = new Chart(bidPurchaseCtx, {
+            type: 'bar',
+            data: {
+                labels: initialBidPurchaseData.map(item => item.month_name),
+                datasets: [{
+                    label: 'Bid Coins Purchased',
+                    data: initialBidPurchaseData.map(item => item.total_bids),
+                    backgroundColor: 'rgba(220, 53, 69, 0.8)',
+                    borderColor: 'rgba(220, 53, 69, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Total Amount (AED)',
+                    data: initialBidPurchaseData.map(item => item.total_amount),
+                    backgroundColor: 'rgba(40, 167, 69, 0.8)',
+                    borderColor: 'rgba(40, 167, 69, 1)',
+                    borderWidth: 1,
+                    yAxisID: 'y1'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Bid Coins'
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Amount (AED)'
+                        },
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.dataset.label === 'Total Amount (AED)') {
+                                    label += 'AED ' + context.parsed.y.toLocaleString();
+                                } else {
+                                    label += context.parsed.y.toLocaleString() + ' coins';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
         // Activity Chart
         const activityCtx = document.getElementById('activityChart').getContext('2d');
         const activityChart = new Chart(activityCtx, {
@@ -284,6 +407,26 @@
                 activityChart.data.datasets[2].data = [112, 119, 103, 105, 102, 103, 110, 115, 120, 125, 122, 118];
             }
             activityChart.update();
+        });
+
+        // Bid Purchase Year Selector
+        const bidPurchaseYear = document.getElementById('bidPurchaseYear');
+        bidPurchaseYear.addEventListener('change', function() {
+            const selectedYear = this.value;
+            
+            // Fetch data for selected year via AJAX
+            fetch(`{{ route('admin.api.monthly-bid-purchases') }}?year=${selectedYear}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Update chart data
+                    bidPurchaseChart.data.labels = data.map(item => item.month_name);
+                    bidPurchaseChart.data.datasets[0].data = data.map(item => item.total_bids);
+                    bidPurchaseChart.data.datasets[1].data = data.map(item => item.total_amount);
+                    bidPurchaseChart.update();
+                })
+                .catch(error => {
+                    console.error('Error fetching bid purchase data:', error);
+                });
         });
     });
 </script>

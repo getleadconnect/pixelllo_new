@@ -440,6 +440,11 @@
             color: var(--warning);
         }
         
+        .admin-card-icon.purchased {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+        }
+        
         .admin-card-content h3 {
             font-size: 1.8rem;
             font-weight: 700;
@@ -1005,9 +1010,17 @@
 
             <!-- Nav Item - Bid Packages -->
             <div class="nav-item">
-                <a class="nav-link {{ request()->is('admin/bid-packages*') ? 'active' : '' }}" href="{{ route('admin.bid-packages.index') }}">
+                <a class="nav-link {{ request()->is('admin/bid-packages*') && !request()->is('admin/bid-purchase-histories*') ? 'active' : '' }}" href="{{ route('admin.bid-packages.index') }}">
                     <i class="fas fa-box"></i>
                     <span>Bid Packages</span>
+                </a>
+            </div>
+
+            <!-- Nav Item - Bid Purchase History -->
+            <div class="nav-item">
+                <a class="nav-link {{ request()->is('admin/bid-purchase-histories*') ? 'active' : '' }}" href="{{ route('admin.bid-purchase-histories.index') }}">
+                    <i class="fas fa-history"></i>
+                    <span>Bid Purchase History</span>
                 </a>
             </div>
 

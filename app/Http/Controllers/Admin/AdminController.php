@@ -11,6 +11,7 @@ use App\Models\Order;
 use App\Services\DatabaseService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
@@ -35,7 +36,8 @@ class AdminController extends Controller
         $totalUsers = User::count();
         $totalAuctions = Auction::count();
         $totalBids = Bid::count();
-        $totalOrders = Order::count() ?? 0;
+        $totalSubscriptions = \DB::table('bid_purchase_histories')->distinct('user_id')->count('user_id') ?? 0;
+        $totalBidsPurchased = \DB::table('bid_purchase_histories')->sum('bid_amount') ?? 0;
         
         // Get recent users
         $recentUsers = User::orderBy('created_at', 'desc')->take(5)->get();
@@ -46,17 +48,74 @@ class AdminController extends Controller
         // Get recent bids
         $recentBids = Bid::with(['user', 'auction'])->orderBy('created_at', 'desc')->take(10)->get();
         
+        // Get monthly bid purchase data for current year
+        $currentYear = now()->year;
+        $monthlyBidPurchases = [];
+        
+        for ($month = 1; $month <= 12; $month++) {
+            $monthStart = \Carbon\Carbon::create($currentYear, $month, 1)->startOfMonth();
+            $monthEnd = \Carbon\Carbon::create($currentYear, $month, 1)->endOfMonth();
+            
+            $monthData = \DB::table('bid_purchase_histories')
+                ->whereBetween('created_at', [$monthStart, $monthEnd])
+                ->selectRaw('COUNT(*) as count, COALESCE(SUM(bid_amount), 0) as total_bids, COALESCE(SUM(bid_price), 0) as total_amount')
+                ->first();
+            
+            $monthlyBidPurchases[] = [
+                'month' => $month,
+                'month_name' => $monthStart->format('M'),
+                'count' => $monthData->count ?? 0,
+                'total_bids' => $monthData->total_bids ?? 0,
+                'total_amount' => $monthData->total_amount ?? 0
+            ];
+        }
+        
         return view('admin.dashboard', compact(
             'totalUsers', 
             'totalAuctions', 
             'totalBids', 
-            'totalOrders', 
+            'totalSubscriptions',
+            'totalBidsPurchased',
             'recentUsers', 
             'recentAuctions', 
-            'recentBids'
+            'recentBids',
+            'monthlyBidPurchases',
+            'currentYear'
         ));
     }
     
+    /**
+     * Get monthly bid purchase data for a specific year (AJAX endpoint)
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getMonthlyBidPurchases(Request $request)
+    {
+        $year = $request->input('year', now()->year);
+        $monthlyData = [];
+        
+        for ($month = 1; $month <= 12; $month++) {
+            $monthStart = \Carbon\Carbon::create($year, $month, 1)->startOfMonth();
+            $monthEnd = \Carbon\Carbon::create($year, $month, 1)->endOfMonth();
+            
+            $monthData = \DB::table('bid_purchase_histories')
+                ->whereBetween('created_at', [$monthStart, $monthEnd])
+                ->selectRaw('COUNT(*) as count, COALESCE(SUM(bid_amount), 0) as total_bids, COALESCE(SUM(bid_price), 0) as total_amount')
+                ->first();
+            
+            $monthlyData[] = [
+                'month' => $month,
+                'month_name' => $monthStart->format('M'),
+                'count' => $monthData->count ?? 0,
+                'total_bids' => $monthData->total_bids ?? 0,
+                'total_amount' => $monthData->total_amount ?? 0
+            ];
+        }
+        
+        return response()->json($monthlyData);
+    }
+
     /**
      * Show the users management page.
      *

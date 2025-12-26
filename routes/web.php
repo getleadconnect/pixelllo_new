@@ -133,6 +133,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/reports/users', [App\Http\Controllers\Admin\AdminController::class, 'usersReport'])->name('admin.reports.users');
     Route::get('/reports/auctions', [App\Http\Controllers\Admin\AdminController::class, 'auctionsReport'])->name('admin.reports.auctions');
     Route::get('/reports/sales', [App\Http\Controllers\Admin\AdminController::class, 'salesReport'])->name('admin.reports.sales');
+    
+    // AJAX endpoints
+    Route::get('/api/monthly-bid-purchases', [App\Http\Controllers\Admin\AdminController::class, 'getMonthlyBidPurchases'])->name('admin.api.monthly-bid-purchases');
 
     // Categories Management
     Route::get('/categories', [App\Http\Controllers\Admin\AdminCategoryController::class, 'index'])->name('admin.categories');
@@ -148,6 +151,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/bid-packages/{id}/edit', [App\Http\Controllers\Admin\AdminBidPackageController::class, 'edit'])->name('admin.bid-packages.edit');
     Route::put('/bid-packages/{id}', [App\Http\Controllers\Admin\AdminBidPackageController::class, 'update'])->name('admin.bid-packages.update');
     Route::delete('/bid-packages/{id}', [App\Http\Controllers\Admin\AdminBidPackageController::class, 'destroy'])->name('admin.bid-packages.destroy');
+
+    // Bid Purchase History Management
+    Route::get('/bid-purchase-histories', [App\Http\Controllers\Admin\AdminBidPurchaseHistoryController::class, 'index'])->name('admin.bid-purchase-histories.index');
 
     // Marketing Management
     Route::get('/marketing', [App\Http\Controllers\Admin\AdminMarketingController::class, 'index'])->name('admin.marketing');

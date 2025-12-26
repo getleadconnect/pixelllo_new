@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\BidPackage;
+use App\Models\BidPurchaseHistory;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -132,6 +133,22 @@ class StripeController extends Controller
                     ->with('error', 'Payment was not successful.');
             }
 
+            // Get the payment intent ID and retrieve transaction details
+            $paymentIntentId = $session['payment_intent'] ?? null;
+            $transactionId = null;
+            
+            if ($paymentIntentId) {
+                try {
+                    $paymentIntent = $stripeService->retrievePaymentIntent($paymentIntentId);
+                    // Get the charge ID (transaction ID) from the payment intent
+                    if (!empty($paymentIntent['charges']['data'])) {
+                        $transactionId = $paymentIntent['charges']['data'][0]['id'] ?? null;
+                    }
+                } catch (\Exception $e) {
+                    Log::warning('Failed to retrieve transaction ID: ' . $e->getMessage());
+                }
+            }
+
             // Get metadata
             $userId = $session['metadata']['user_id'] ?? null;
             $packageId = $session['metadata']['package_id'] ?? null;
@@ -158,6 +175,16 @@ class StripeController extends Controller
             $oldBalance = $user->bid_balance;
             $user->bid_balance += $bidAmount;
             $user->save();
+
+            // Create bid purchase history record
+            BidPurchaseHistory::create([
+                'user_id' => $user->id,
+                'bid_amount' => $bidAmount,
+                'bid_price' => $package->price,
+                'description' => $package->name . ' - ' . $bidAmount . ' Bid Credits',
+                'stripe_session_id' => $sessionId,
+                'stripe_transaction_id' => $transactionId
+            ]);
 
             // Mark as processed
             session([$processedKey => true]);

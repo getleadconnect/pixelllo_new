@@ -112,7 +112,7 @@ class AuthController extends Controller
             }
 
             return back()->withErrors([
-                'email' => ['The provided credentials are incorrect.'],
+                'email' => ['The provided credentials are incorrect1.'],
             ])->withInput($request->except('password'));
         }
 
