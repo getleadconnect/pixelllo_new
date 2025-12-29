@@ -841,11 +841,11 @@ src="https://www.facebook.com/tr?id=1635957597815050&ev=PageView&noscript=1"
                             </li>
                             <li>
                                 <div class="contact-icon"><i class="fas fa-phone"></i></div>
-                                <div class="contact-info">+1 (555) 123-4567</div>
+                                <div class="contact-info">+971 509475227</div>
                             </li>
                             <li>
                                 <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
-                                <div class="contact-info">123 Auction St, Suite 456<br>San Francisco, CA 94107</div>
+                                <div class="contact-info">206, Rawdat, Al wasal Building, Business Bay, Dubai</div>
                             </li>
                         </ul>
                         <div class="newsletter">
