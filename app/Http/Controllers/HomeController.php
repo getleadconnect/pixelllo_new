@@ -445,6 +445,25 @@ class HomeController extends Controller
      */
     public function auctionDetail($id)
     {
+
+        $auction = Auction::with(['category', 'winner', 'bids' => function($query) {
+            $query->with('user')->orderBy('created_at', 'desc');
+        }])->findOrFail($id);
+
+        // to check the winner_id and latest bid user id is same, Other wise change the bid winner 
+        if($auction->status === 'ended')
+          {
+                $wbid=Bid::where('auction_id',$auction->id)->orderBy('amount','DESC')->first();
+                if($wbid)
+                {
+                    if($wbid->user_id!=$auction->winner_id)
+                     {
+                        $auction->winner_id=$wbid->user_id;
+                        $auction->save();
+                     }
+                }
+          }
+
         $auction = Auction::with(['category', 'winner', 'bids' => function($query) {
             $query->with('user')->orderBy('created_at', 'desc');
         }])->findOrFail($id);

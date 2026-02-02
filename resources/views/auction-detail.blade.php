@@ -989,7 +989,8 @@
                             <button class="btn btn-outline btn-block-auto">Notify Me When Live</button>
                         </div>
                     @elseif($auction->status === 'ended')
-                        <div class="ended-auction-info">
+
+                       <div class="ended-auction-info">
                             <div class="auction-price-container">
                                 <div class="current-price">
                                     <span class="price-label">Final Price:</span>
