@@ -218,7 +218,7 @@ class StripeService
         try {
             $endpoint = "/payment_intents/{$paymentIntentId}";
 
-            $response = $this->makeStripeRequest('GET', $endpoint);
+            $response = $this->makeRequest('GET', $endpoint);
 
             if ($response === false) {
                 throw new Exception('Failed to retrieve payment intent from Stripe');
