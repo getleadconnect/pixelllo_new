@@ -133,20 +133,65 @@ class StripeController extends Controller
                     ->with('error', 'Payment was not successful.');
             }
 
-            // Get the payment intent ID and retrieve transaction details
-            $paymentIntentId = $session['payment_intent'] ?? null;
+            // Get transaction ID from payment intent
             $transactionId = null;
-            
-            if ($paymentIntentId) {
-                try {
-                    $paymentIntent = $stripeService->retrievePaymentIntent($paymentIntentId);
-                    // Get the charge ID (transaction ID) from the payment intent
-                    if (!empty($paymentIntent['charges']['data'])) {
-                        $transactionId = $paymentIntent['charges']['data'][0]['id'] ?? null;
-                    }
-                } catch (\Exception $e) {
-                    Log::warning('Failed to retrieve transaction ID: ' . $e->getMessage());
+            $paymentIntentId = null;
+
+            // Get payment intent ID from session
+            if (isset($session['payment_intent'])) {
+                // Extract payment intent ID (could be string or array)
+                if (is_array($session['payment_intent'])) {
+                    $paymentIntentId = $session['payment_intent']['id'] ?? null;
+                } else {
+                    $paymentIntentId = $session['payment_intent'];
                 }
+
+                // Always retrieve payment intent with charges to ensure we get the transaction ID
+                if ($paymentIntentId) {
+                    try {
+                        Log::info('Retrieving payment intent with charges', ['payment_intent_id' => $paymentIntentId]);
+
+                        $paymentIntent = $stripeService->retrievePaymentIntent($paymentIntentId);
+
+                        Log::info('Payment intent retrieved', [
+                            'payment_intent_id' => $paymentIntentId,
+                            'has_charges' => isset($paymentIntent['charges']),
+                            'has_latest_charge' => isset($paymentIntent['latest_charge']),
+                            'charges_count' => isset($paymentIntent['charges']['data']) ? count($paymentIntent['charges']['data']) : 0
+                        ]);
+
+                        // Try to get transaction ID from charges
+                        if (!empty($paymentIntent['charges']['data'])) {
+                            $transactionId = $paymentIntent['charges']['data'][0]['id'] ?? null;
+                        }
+
+                        // Fallback: try latest_charge if charges array is empty
+                        if (!$transactionId && isset($paymentIntent['latest_charge'])) {
+                            $transactionId = is_string($paymentIntent['latest_charge'])
+                                ? $paymentIntent['latest_charge']
+                                : ($paymentIntent['latest_charge']['id'] ?? null);
+                        }
+
+                        if ($transactionId) {
+                            Log::info('Transaction ID extracted successfully', ['transaction_id' => $transactionId]);
+                        } else {
+                            Log::warning('Could not extract transaction ID from payment intent', [
+                                'payment_intent_structure' => array_keys($paymentIntent ?? [])
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        Log::error('Failed to retrieve payment intent', [
+                            'error' => $e->getMessage(),
+                            'payment_intent_id' => $paymentIntentId,
+                            'trace' => $e->getTraceAsString()
+                        ]);
+                    }
+                }
+            } else {
+                Log::warning('No payment intent in session', [
+                    'session_id' => $sessionId,
+                    'session_keys' => array_keys($session ?? [])
+                ]);
             }
 
             // Get metadata
@@ -196,7 +241,8 @@ class StripeController extends Controller
                 'bid_amount' => $bidAmount,
                 'old_balance' => $oldBalance,
                 'new_balance' => $user->bid_balance,
-                'stripe_session_id' => $sessionId
+                'stripe_session_id' => $sessionId,
+                'stripe_transaction_id' => $transactionId
             ]);
 
             // Clear stripe session

@@ -73,7 +73,8 @@ class StripeService
     public function retrieveSession($sessionId)
     {
         try {
-            $endpoint = '/checkout/sessions/' . $sessionId;
+            // Expand payment_intent AND its nested charges to get transaction ID
+            $endpoint = '/checkout/sessions/' . $sessionId . '?expand[]=payment_intent&expand[]=payment_intent.charges';
             return $this->makeRequest('GET', $endpoint);
         } catch (Exception $e) {
             Log::error('Stripe retrieveSession error: ' . $e->getMessage());
@@ -216,7 +217,14 @@ class StripeService
     public function retrievePaymentIntent($paymentIntentId)
     {
         try {
-            $endpoint = "/payment_intents/{$paymentIntentId}";
+            // Expand charges to get transaction details
+            $endpoint = "/payment_intents/{$paymentIntentId}?expand[]=charges";
+            $fullUrl = $this->apiBase . $endpoint;
+
+            Log::info('Stripe API: Retrieving payment intent', [
+                'url' => $fullUrl,
+                'payment_intent_id' => $paymentIntentId
+            ]);
 
             $response = $this->makeRequest('GET', $endpoint);
 
@@ -224,10 +232,20 @@ class StripeService
                 throw new Exception('Failed to retrieve payment intent from Stripe');
             }
 
+            // Log the response structure for debugging
+            Log::info('Stripe API: Payment intent response', [
+                'payment_intent_id' => $paymentIntentId,
+                'response_keys' => array_keys($response ?? []),
+                'has_charges' => isset($response['charges']),
+                'has_latest_charge' => isset($response['latest_charge']),
+                'latest_charge_value' => $response['latest_charge'] ?? null
+            ]);
+
             return $response;
         } catch (Exception $e) {
             Log::error('Stripe retrievePaymentIntent error: ' . $e->getMessage(), [
-                'payment_intent_id' => $paymentIntentId
+                'payment_intent_id' => $paymentIntentId,
+                'trace' => $e->getTraceAsString()
             ]);
             throw $e;
         }
